@@ -127,17 +127,12 @@ class ArchiveBot():
             user = message.from_user
             subscriber = Subscriber.get_or_create(session, chat_id, chat_id)
 
-            print("Incoming")
             if subscriber.active is False:
-                print("Not active")
                 return
 
             if message.document is None:
-                print("No document")
                 return
 
-            print(f"Adding new File: {message.document.file_name}")
-            print(message.document.mime_type)
             # Get and create paths for this file
             file_path = self.get_file_path(subscriber, user, message)
 
