@@ -14,6 +14,7 @@ Available commands:
     /start Start the bot
     /stop Stop the bot
     /set_name Set the name for this chat. This also determines the name of the target folder on the server.
+    /help Show this text
 
 Feel free to host your own or to use mine: @NukesArchiveBot
 
