@@ -27,14 +27,14 @@ class ArchiveBot():
 
         # Save directory for files
         if not os.path.exists(config.TARGET_DIR):
-            os.makedir(config.TARGET_DIR)
+            os.mkdir(config.TARGET_DIR)
 
         # Telegram logic updater and dispatcher
         self.updater = Updater(token=config.TELEGRAM_API_KEY)
         dispatcher = self.updater.dispatcher
 
         # Create handler
-        message_handler = MessageHandler(Filters.text, self.process)
+        message_handler = MessageHandler(Filters.document, self.process)
         help_handler = CommandHandler('help', self.help)
         start_handler = CommandHandler('start', self.start)
         stop_handler = CommandHandler('stop', self.stop)
@@ -86,10 +86,11 @@ class ArchiveBot():
         try:
             chat_id = update.message.chat_id
 
-            subscriber = self.get_or_create_subscriber(session, chat_id)
+            subscriber = Subscriber.get_or_create(session, chat_id, chat_id)
             subscriber.active = True
             session.add(subscriber)
             session.commit()
+            print("Started new channel.")
 
             text = 'Files posted in this channel will now be archived.'
             bot.sendMessage(chat_id=chat_id, text=text)
@@ -105,7 +106,7 @@ class ArchiveBot():
         try:
             chat_id = update.message.chat_id
 
-            subscriber = self.get_or_create_subscriber(session, chat_id)
+            subscriber = Subscriber.get_or_create(session, chat_id, chat_id)
             subscriber.active = False
             session.add(subscriber)
             session.commit()
@@ -125,16 +126,27 @@ class ArchiveBot():
             message = update.message
             chat_id = message.chat_id
             user = message.from_user
-            subscriber = Subscriber.get_or_create(session, chat_id)
+            subscriber = Subscriber.get_or_create(session, chat_id, chat_id)
 
+            print("Incoming")
             if subscriber.active is False:
+                print("Not active")
                 return
 
             if message.document is None:
+                print("No document")
                 return
 
+            print(f"Adding new File: {message.document.file_name}")
+            print(message.document.mime_type)
             # Create new file
-            new_file = File(chat_id, message.message_id, user.user_id, message.document.file_name)
+            new_file = File(
+                message.document.file_id,
+                chat_id,
+                message.message_id,
+                user.id,
+                message.document.file_name,
+            )
             session.add(new_file)
             session.commit()
 
@@ -148,7 +160,7 @@ class ArchiveBot():
                         'file_path': file_path,
                         'group': subscriber.group_name,
                         'user': user.username,
-                    }
+                    },
                 )
 
             # Download the file
@@ -160,7 +172,7 @@ class ArchiveBot():
             new_file.success = True
             session.commit()
         except Exception:
-            print(traceback.format_exc())
+            traceback.print_exc()
             self.sentry.captureException()
         finally:
             session.remove()
@@ -171,8 +183,8 @@ class ArchiveBot():
 
     def get_file_path(self, subscriber, user, message):
         """Compile the file path and ensure the parent directories exist."""
-        user_path = os.path.join(self.get_group_path(subscriber.group_name), user.username.to_lower())
+        user_path = os.path.join(self.get_group_path(subscriber.group_name), user.username.lower())
         if not os.path.exists(user_path):
-            os.makedirs(user_path, exist=True)
+            os.makedirs(user_path, exist_ok=True)
 
         return os.path.join(user_path, message.document.file_name)

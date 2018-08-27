@@ -8,14 +8,16 @@ class File(base):
 
     __tablename__ = 'file'
 
-    chat_id = Column(Integer(), primary_key=True)
-    message_id = Column(Integer(), primary_key=True)
-    user_id = Column(Integer(), primary_key=True)
-    file_name = Column(String(100), primary_key=True)
+    file_id = Column(String(), primary_key=True)
+    chat_id = Column(Integer())
+    message_id = Column(Integer())
+    user_id = Column(Integer())
+    file_name = Column(String())
     success = Column(Boolean(), nullable=False, default=False)
 
-    def __init__(self, chat_id, message_id, user_id, name):
+    def __init__(self, file_id, chat_id, message_id, user_id, name):
         """Create a new file."""
+        self.file_id = file_id
         self.chat_id = chat_id
         self.message_id = message_id
         self.user_id = user_id

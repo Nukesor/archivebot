@@ -10,8 +10,8 @@ class Subscriber(base):
     __tablename__ = 'subscriber'
 
     chat_id = Column(Integer(), primary_key=True)
-    group_name = Column(String(100), primary_key=True)
-    active = Column(Boolean(), nullable=False, default=True)
+    group_name = Column(String())
+    active = Column(Boolean(), nullable=False, default=False)
 
     def __init__(self, chat_id, group_name):
         """Create a new subscriber."""

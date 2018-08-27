@@ -1,6 +1,6 @@
-python-telegram-bot~=8.1
-SQLAlchemy~=1.1.4
-sqlalchemy-utils~=0.32.12
+python-telegram-bot~=10.1
+SQLAlchemy~=1.2
+sqlalchemy-utils~=0.33
 
 # Logging
 raven
