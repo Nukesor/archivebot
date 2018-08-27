@@ -1,0 +1,14 @@
+python-telegram-bot~=10.1
+SQLAlchemy~=1.2
+sqlalchemy-utils~=0.33
+
+# Logging
+raven
+
+# Linting
+flake8
+flake8-docstrings
+flake8-print
+flake8-commas
+flake8-bugbear
+flake8-string-format
