@@ -138,17 +138,6 @@ class ArchiveBot():
 
             print(f"Adding new File: {message.document.file_name}")
             print(message.document.mime_type)
-            # Create new file
-            new_file = File(
-                message.document.file_id,
-                chat_id,
-                message.message_id,
-                user.id,
-                message.document.file_name,
-            )
-            session.add(new_file)
-            session.commit()
-
             # Get and create paths for this file
             file_path = self.get_file_path(subscriber, user, message)
 
@@ -160,7 +149,20 @@ class ArchiveBot():
                         'group': subscriber.group_name,
                         'user': user.username,
                     },
+                    tags={'level': 'info'},
                 )
+                return
+
+            # Create new file
+            new_file = File(
+                message.document.file_id,
+                chat_id,
+                message.message_id,
+                user.id,
+                message.document.file_name,
+            )
+            session.add(new_file)
+            session.commit()
 
             # Download the file
             message.document \
