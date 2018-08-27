@@ -20,9 +20,19 @@ class Sentry(object):
     def captureMessage(self, *args, **kwargs):
         """Capture message with sentry."""
         if self.initialized:
+            if 'tags' not in kwargs:
+                kwargs['tags'] = {}
+
+            # Tag it as hetznerbot
+            kwargs['tags']['bot'] = 'archivebot'
             self.sentry.captureMessage(*args, **kwargs)
 
     def captureException(self, *args, **kwargs):
         """Capture exception with sentry."""
         if self.initialized:
+            if 'tags' not in kwargs:
+                kwargs['tags'] = {}
+
+            # Tag it as hetznerbot
+            kwargs['tags']['bot'] = 'archivebot'
             self.sentry.captureException(*args, **kwargs)

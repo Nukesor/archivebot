@@ -11,7 +11,6 @@ from archivebot.helper import help_text
 
 from telegram.ext import (
     CommandHandler,
-    Filters,
     MessageHandler,
     Updater,
 )
@@ -34,7 +33,7 @@ class ArchiveBot():
         dispatcher = self.updater.dispatcher
 
         # Create handler
-        message_handler = MessageHandler(Filters.document, self.process)
+        message_handler = MessageHandler(config.MESSAGE_FILTER, self.process)
         help_handler = CommandHandler('help', self.help)
         start_handler = CommandHandler('start', self.start)
         stop_handler = CommandHandler('stop', self.stop)
@@ -62,7 +61,7 @@ class ArchiveBot():
         session = get_session()
         try:
             chat_id = update.message.chat_id
-            group_name = update.message.text.lower()
+            group_name = update.message.text.split(' ', maxsplit=1)[1]
             subscriber = Subscriber.get_or_create(session, chat_id, group_name)
 
             old_group_path = self.get_group_path(subscriber.group_name)
