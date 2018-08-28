@@ -1,3 +1,6 @@
+cryptg
+telethon~=1.2
+telethon-sync~=1.0
 python-telegram-bot~=10.1
 SQLAlchemy~=1.2
 sqlalchemy-utils~=0.33

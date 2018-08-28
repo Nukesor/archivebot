@@ -2,18 +2,19 @@
 
 import os
 import traceback
+from telethon import TelegramClient, sync  # noqa
+from telegram.ext import (
+    CommandHandler,
+    MessageHandler,
+    Updater,
+)
+
 from archivebot.config import config
 from archivebot.db import get_session
 from archivebot.subscriber import Subscriber
 from archivebot.file import File
 from archivebot.sentry import Sentry
 from archivebot.helper import help_text
-
-from telegram.ext import (
-    CommandHandler,
-    MessageHandler,
-    Updater,
-)
 
 
 class ArchiveBot():
@@ -23,14 +24,22 @@ class ArchiveBot():
         """Initialize telegram bot and all needed variables."""
         # Initialize sentry
         self.sentry = Sentry()
+        self.telegram_client = TelegramClient(
+            'archiveBot',
+            config.TELEGRAM_APP_API_ID,
+            config.TELEGRAM_APP_API_HASH,
+        )
+        self.telegram_client.connect()
 
         # Save directory for files
         if not os.path.exists(config.TARGET_DIR):
             os.mkdir(config.TARGET_DIR)
 
         # Telegram logic updater and dispatcher
-        self.updater = Updater(token=config.TELEGRAM_API_KEY)
+        self.updater = Updater(token=config.TELEGRAM_BOT_API_KEY)
         dispatcher = self.updater.dispatcher
+
+        self.check_telegram_client_login(self.updater.bot)
 
         # Create handler
         message_handler = MessageHandler(config.MESSAGE_FILTER, self.process)
@@ -38,6 +47,7 @@ class ArchiveBot():
         start_handler = CommandHandler('start', self.start)
         stop_handler = CommandHandler('stop', self.stop)
         set_name_handler = CommandHandler('set_name', self.set_name)
+        login = CommandHandler('login', self.login)
 
         # Add handler
         dispatcher.add_handler(message_handler)
@@ -45,6 +55,7 @@ class ArchiveBot():
         dispatcher.add_handler(start_handler)
         dispatcher.add_handler(stop_handler)
         dispatcher.add_handler(set_name_handler)
+        dispatcher.add_handler(login)
 
         self.updater.start_polling()
 
@@ -55,6 +66,19 @@ class ArchiveBot():
     def help(self, bot, update):
         """Send a help text."""
         bot.sendMessage(chat_id=update.message.chat_id, text=help_text)
+
+    def login(self, bot, update):
+        """Set query attributes."""
+        try:
+            login_code = update.message.text.split(' ', maxsplit=1)[1].strip()[:-3]
+            self.telegram_client.sign_in(config.TELEGRAM_PHONE_NUMBER, login_code)
+            bot.sendMessage(
+                config.TELEGRAM_ADMIN_USER_ID,
+                "Login successful",
+            )
+        except BaseException:
+            traceback.print_exc()
+            self.sentry.captureException()
 
     def set_name(self, bot, update):
         """Set query attributes."""
@@ -89,7 +113,6 @@ class ArchiveBot():
             subscriber.active = True
             session.add(subscriber)
             session.commit()
-            print("Started new channel.")
 
             text = 'Files posted in this channel will now be archived.'
             bot.sendMessage(chat_id=chat_id, text=text)
@@ -148,6 +171,25 @@ class ArchiveBot():
                 )
                 return
 
+            self.check_telegram_client_login(bot)
+
+            print('Message')
+            # Try to get the telegram client message
+            client_message = self.telegram_client.get_messages(
+                chat_id, ids=message.message_id)
+
+            if client_message is None:
+                print('No message')
+                self.sentry.captureMessage(
+                    "Message is not readable by client",
+                    extra={
+                        'group': subscriber.group_name,
+                        'user': user.username,
+                    },
+                    tags={'level': 'info'},
+                )
+                return
+
             # Create new file
             new_file = File(
                 message.document.file_id,
@@ -159,13 +201,15 @@ class ArchiveBot():
             session.add(new_file)
             session.commit()
 
+            print('here')
             # Download the file
-            message.document \
-                .get_file(config.TELEGRAM_FILE_TIMOUT) \
-                .download(file_path)
+            success = self.telegram_client.download_media(client_message, file_path)
+            print(success)
 
-            # Mark the file as succeeded
-            new_file.success = True
+            # Download succeeded, if the result is not None
+            if success is not None:
+                # Mark the file as succeeded
+                new_file.success = True
             session.commit()
         except Exception:
             traceback.print_exc()
@@ -184,3 +228,20 @@ class ArchiveBot():
             os.makedirs(user_path, exist_ok=True)
 
         return os.path.join(user_path, message.document.file_name)
+
+    def check_telegram_client_login(self, bot):
+        """Check if we have a valid telegram login and request a new code via telegram chat or manual input."""
+        if not self.telegram_client.is_user_authorized():
+            self.telegram_client.send_code_request(config.TELEGRAM_PHONE_NUMBER)
+
+            # We don't have a valid login. Await manual login or send notification.
+            if not config.TELEGRAM_ADMIN_USER_ID:
+                self.telegram_client.sign_in(
+                    config.TELEGRAM_PHONE_NUMBER,
+                    input('Enter code: '),
+                )
+            else:
+                bot.sendMessage(
+                    config.TELEGRAM_ADMIN_USER_ID,
+                    "Expecting login code. Add three symbols (e.g. 34251XXX).",
+                )
