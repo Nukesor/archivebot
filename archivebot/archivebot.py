@@ -14,6 +14,7 @@ from archivebot.helper import (
     help_text,
     get_file_path,
     get_group_path,
+    get_chat_id,
 )
 
 NAME = config.TELEGRAM_BOT_API_KEY.split(':')[0]
@@ -34,20 +35,27 @@ async def set_name(event):
     """Set query attributes."""
     session = get_session()
     try:
-        chat_id = event.message.to_id.user_id
+        chat_id = get_chat_id(event.message.to_id)
         group_name = event.message.message.split(' ', maxsplit=1)[1]
         subscriber = Subscriber.get_or_create(session, chat_id, group_name)
 
         old_group_path = get_group_path(subscriber.group_name)
         new_group_path = get_group_path(group_name)
-        if os.path.exists(old_group_path) and old_group_path != new_group_path:
-            os.rename(old_group_path, new_group_path)
 
-        subscriber.group_name = group_name
+        if os.path.exists(new_group_path):
+            text = "Group name already exists. Please choose another one."
+            await asyncio.wait([event.respond(text)])
+
+        elif old_group_path != new_group_path:
+            subscriber.group_name = group_name
+            if os.path.exists(old_group_path):
+                os.rename(old_group_path, new_group_path)
+            text = "Group name changed."
+            await asyncio.wait([event.respond(text)])
 
         session.commit()
-
     except BaseException:
+        await asyncio.wait([event.respond("Some unknown error occurred.")])
         traceback.print_exc()
         sentry.captureException()
     finally:
@@ -59,7 +67,7 @@ async def start(event):
     """Start the bot."""
     session = get_session()
     try:
-        chat_id = event.message.to_id.user_id
+        chat_id = get_chat_id(event.message.to_id)
 
         subscriber = Subscriber.get_or_create(session, chat_id, chat_id)
         subscriber.active = True
@@ -80,7 +88,7 @@ async def stop(event):
     """Stop the bot."""
     session = get_session()
     try:
-        chat_id = event.message.to_id.user_id
+        chat_id = get_chat_id(event.message.to_id)
 
         subscriber = Subscriber.get_or_create(session, chat_id, chat_id)
         subscriber.active = False
@@ -102,7 +110,7 @@ async def process(event):
     try:
         session = get_session()
         message = event.message
-        chat_id = message.to_id.user_id
+        chat_id = get_chat_id(event.message.to_id)
         subscriber = Subscriber.get_or_create(session, chat_id, chat_id)
 
         # Check if we should accept this message

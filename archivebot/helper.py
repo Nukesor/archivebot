@@ -22,6 +22,18 @@ Available commands:
 """
 
 
+def get_chat_id(chat):
+    """Get the id depending on the chat type."""
+    if isinstance(chat, types.PeerUser):
+        return chat.user_id
+    elif isinstance(chat, types.PeerChat):
+        return chat.chat_id
+    elif isinstance(chat, types.PeerChannel):
+        return chat.channel_id
+    else:
+        raise Exception("Unknown chat type")
+
+
 def get_group_path(group_name):
     """Compile the directory path for this group."""
     return os.path.join(config.TARGET_DIR, group_name)
