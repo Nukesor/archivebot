@@ -64,4 +64,4 @@ target/
 # Repository kram
 */**/config.py
 archivebot.db
-archiveBot.session*
+*.session*

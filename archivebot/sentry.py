@@ -36,3 +36,6 @@ class Sentry(object):
             # Tag it as hetznerbot
             kwargs['tags']['bot'] = 'archivebot'
             self.sentry.captureException(*args, **kwargs)
+
+
+sentry = Sentry()

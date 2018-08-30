@@ -1,5 +1,4 @@
 """Config values for archivebot."""
-from telegram.ext import Filters
 
 
 class Config:
@@ -11,16 +10,13 @@ class Config:
     # Get client api keys from https://my.telegram.org
     TELEGRAM_APP_API_ID = None
     TELEGRAM_APP_API_HASH = None
-    TELEGRAM_PHONE_NUMBER = None
-
-    # The chat used for entering the login telegram login code
-    TELEGRAM_ADMIN_USER_ID = None
 
     SQL_URI = 'sqlite:///archivebot.db'
     TARGET_DIR = '/home/bot/archivebot/'
     SENTRY_KEY = None
-    # Allow videos and documents. Allow more file types with e.g. (.. | Filters.image)
-    MESSAGE_FILTER = (Filters.document | Filters.video)
+
+    # Allowed media types
+    ALLOWED_MEDIA_TYPES = ['photo', 'document']
 
 
 config = Config()
