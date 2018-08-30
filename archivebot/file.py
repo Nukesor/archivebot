@@ -8,10 +8,10 @@ class File(base):
 
     __tablename__ = 'file'
 
-    file_id = Column(String(), primary_key=True)
+    message_id = Column(Integer(), primary_key=True)
     chat_id = Column(Integer())
-    message_id = Column(Integer())
     user_id = Column(Integer())
+    file_id = Column(String())
     file_name = Column(String())
     file_type = Column(String())
     success = Column(Boolean(), nullable=False, default=False)
