@@ -25,9 +25,10 @@ if not os.path.exists(config.TARGET_DIR):
     os.mkdir(config.TARGET_DIR)
 
 
-async def help(bot, update):
+@archive.on(events.NewMessage(pattern='/help'))
+async def help(event):
     """Send a help text."""
-    bot.sendMessage(chat_id=update.message.chat_id, text=help_text)
+    await asyncio.wait([event.respond(help_text)])
 
 
 @archive.on(events.NewMessage(pattern='/set_name .'))
