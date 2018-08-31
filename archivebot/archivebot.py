@@ -1,6 +1,5 @@
 """A bot which downloads various files from chats."""
 import os
-import asyncio
 from telethon import TelegramClient, events
 
 from archivebot.config import config
@@ -34,7 +33,7 @@ if not os.path.exists(config.TARGET_DIR):
 @archive.on(events.NewMessage(pattern='/help'))
 async def help(event):
     """Send a help text."""
-    await asyncio.wait([event.respond(help_text)])
+    await event.respond(help_text)
 
 
 @archive.on(events.NewMessage(pattern='/info'))
@@ -43,7 +42,7 @@ async def info(event, session):
     """Send a help text."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
     subscriber = Subscriber.get_or_create(session, chat_id, chat_type, chat_id)
-    await asyncio.wait([event.respond(get_info_text(subscriber))])
+    await event.respond(get_info_text(subscriber))
 
 
 @archive.on(events.NewMessage(pattern='/set_name'))
@@ -62,20 +61,20 @@ async def set_name(event, session):
     if not new_real_path.startswith(target_real_path) or \
             new_real_path == target_real_path:
         text = "Please stop fooling around and trying to escape the directory."
-        await asyncio.wait([event.respond(text)])
+        await event.respond(text)
 
         return
 
     if os.path.exists(new_channel_path):
         text = "Channel name already exists. Please choose another one."
-        await asyncio.wait([event.respond(text)])
+        await event.respond(text)
 
     elif old_channel_path != new_channel_path:
         subscriber.channel_name = channel_name
         if os.path.exists(old_channel_path):
             os.rename(old_channel_path, new_channel_path)
         text = "Channel name changed."
-        await asyncio.wait([event.respond(text)])
+        await event.respond(text)
 
     session.commit()
 
@@ -92,11 +91,11 @@ async def set_verbose(event, session):
         value = get_bool_from_text(event.message.message.split(' ', maxsplit=1)[1])
     except Exception:
         text = "Got an invalid value. Please use one of [true, false, on, off, 0, 1]"
-        return await asyncio.wait([event.respond(text)])
+        return await event.respond(text)
 
     subscriber.verbose = value
     text = f"I'm now configured to be {'verbose' if value else 'sneaky'}."
-    await asyncio.wait([event.respond(text)])
+    await event.respond(text)
 
     session.commit()
 
@@ -113,11 +112,11 @@ async def set_sort_by_user(event, session):
         value = get_bool_from_text(event.message.message.split(' ', maxsplit=1)[1])
     except Exception:
         text = "Got an invalid value. Please use one of [true, false, on, off, 0, 1]"
-        return await asyncio.wait([event.respond(text)])
+        return await event.respond(text)
 
     subscriber.sort_by_user = value
     text = f"{'Sorting' if value else 'Not sorting'} by user."
-    await asyncio.wait([event.respond(text)])
+    await event.respond(text)
 
     session.commit()
 
@@ -141,7 +140,7 @@ async def accepted_media_types(event, session):
 
     subscriber.accepted_media = ' '.join(accepted_media)
     text = f"Now accepting following media types: {accepted_media}."
-    await asyncio.wait([event.respond(text)])
+    await event.respond(text)
 
     session.commit()
 
@@ -158,7 +157,7 @@ async def start(event, session):
     session.commit()
 
     text = 'Files posted in this channel will now be archived.'
-    await asyncio.wait([event.respond(text)])
+    await event.respond(text)
 
 
 @archive.on(events.NewMessage(pattern='/stop'))
@@ -173,7 +172,7 @@ async def stop(event, session):
     session.commit()
 
     text = "Files won't be archived any longer."
-    await asyncio.wait([event.respond(text)])
+    await event.respond(text)
 
 
 @archive.on(events.NewMessage())
@@ -186,7 +185,7 @@ async def process(event, session):
 
     # If this message is forwarded, get the original sender.
     if message.forward:
-        user = await archive.get_entity(await message.forward.get_sender())
+        user = await message.forward.get_sender()
     else:
         user = await archive.get_entity(message.from_id)
 
@@ -240,7 +239,7 @@ async def get_file_information(event, message, subscriber, user):
         # Flame the user that compressed photos are evil
         if subscriber.verbose:
             text = f"Please send uncompressed files @{user.username} :(."
-            await asyncio.wait([event.respond(text)])
+            await event.respond(text)
 
     if 'document' in accepted_media \
             and message.document is not None:

@@ -1,6 +1,5 @@
 """Helper module for file helper."""
 import os
-import asyncio
 from telethon import types
 
 from archivebot.config import config
@@ -47,7 +46,7 @@ async def check_if_file_exists(event, file_path, file_name, subscriber, user):
         # Inform the user about duplicate files
         if subscriber.verbose:
             text = f"File with name {file_name} already exists."
-            await asyncio.wait([event.respond(text)])
+            await event.respond(text)
 
         sentry.captureMessage(
             "File already exists",
