@@ -11,15 +11,17 @@ class Subscriber(base):
 
     chat_id = Column(Integer(), primary_key=True)
     chat_type = Column(String, primary_key=True)
-    channel_name = Column(String())
+    channel_name = Column(String(), nullable=False)
+    accepted_media = Column(String(), nullable=False, default='')
     active = Column(Boolean(), nullable=False, default=False)
     verbose = Column(Boolean(), nullable=False, default=False)
 
-    def __init__(self, chat_id, chat_type, channel_name):
+    def __init__(self, chat_id, chat_type, channel_name, accepted_media='document'):
         """Create a new subscriber."""
         self.chat_id = chat_id
         self.chat_type = chat_type
         self.channel_name = channel_name
+        self.accepted_media = accepted_media
 
     @staticmethod
     def get_or_create(session, chat_id, chat_type, channel_name):
@@ -29,6 +31,5 @@ class Subscriber(base):
             subscriber = Subscriber(chat_id, chat_type, channel_name)
             session.add(subscriber)
             session.commit()
-            subscriber = session.query(Subscriber).get((chat_id, chat_type))
 
         return subscriber

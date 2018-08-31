@@ -6,5 +6,8 @@ venv:
 	venv/bin/pip install -r requirements.txt --upgrade
 	venv/bin/pip install -r requirements-dev.txt --upgrade
 
-tesclean:
+dev: venv
+	venv/bin/pip install -r requirements-dev.txt --upgrade
+
+clean:
 	rm -rf venv

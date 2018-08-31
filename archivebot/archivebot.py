@@ -15,6 +15,7 @@ from archivebot.helper import (
     get_file_path,
     get_channel_path,
     help_text,
+    possible_media,
 )
 
 NAME = config.TELEGRAM_BOT_API_KEY.split(':')[0]
@@ -83,6 +84,37 @@ async def set_verbose(event):
             text = f"I'm now configured to be verbose."
         else:
             text = f"I'm now configured to be sneaky."
+        await asyncio.wait([event.respond(text)])
+
+        session.commit()
+    except BaseException:
+        await asyncio.wait([event.respond("Some unknown error occurred.")])
+        traceback.print_exc()
+        sentry.captureException()
+    finally:
+        session.remove()
+
+
+@archive.on(events.NewMessage(pattern='/accept .'))
+async def accepted_media_types(event):
+    """Set query attributes."""
+    session = get_session()
+    try:
+        chat_id, chat_type = get_chat_information(event.message.to_id)
+        subscriber = Subscriber.get_or_create(session, chat_id, chat_type, chat_id)
+
+        # Convert the incoming text into an boolean
+        arguments = event.message.message.lower().split(' ')[1:]
+        accepted_media = set()
+        for argument in arguments:
+            if argument in possible_media:
+                accepted_media.add(argument)
+
+        accepted_media = list(accepted_media)
+        accepted_media.sort()
+
+        subscriber.accepted_media = ' '.join(accepted_media)
+        text = f"Now accepting following media types: {accepted_media}."
         await asyncio.wait([event.respond(text)])
 
         session.commit()
@@ -216,7 +248,9 @@ async def get_file_information(event, message, subscriber, user):
     file_id = None
     file_type = None
 
-    if 'photo' in config.ALLOWED_MEDIA_TYPES \
+    accepted_media = subscriber.accepted_media.split(' ')
+
+    if 'photo' in accepted_media \
             and message.photo is not None:
         file_type = 'photo'
         file_id = message.photo.id
@@ -226,7 +260,7 @@ async def get_file_information(event, message, subscriber, user):
             text = f"Please send uncompressed files @{user.username} :(."
             await asyncio.wait([event.respond(text)])
 
-    if 'document' in config.ALLOWED_MEDIA_TYPES \
+    if 'document' in accepted_media \
             and message.document is not None:
         file_type = 'document'
         file_id = message.document.id

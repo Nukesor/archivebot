@@ -13,6 +13,9 @@ class Config:
 
     SQL_URI = 'sqlite:///archivebot.db'
     TARGET_DIR = '/home/bot/archivebot/'
+
+    # Can be omitted.
+    # Only needed, if you want to monitor your bot in production with sentry.
     SENTRY_KEY = None
 
     # Allowed media types
