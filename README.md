@@ -17,7 +17,9 @@ To send multiple uncompressed pictures and videos with your phone:
 - Only accept specified media types.
 - Properly handle forwarded messages (If sort_by_user is enabled, the original sender will be used).
 
-![Pueue](https://raw.githubusercontent.com/Nukesor/images/master/archivebot_example.png)
+<p align="center">
+    <img width="460" height="300" src="https://raw.githubusercontent.com/Nukesor/images/master/archivebot_example.png">
+</p>
 
 ## Installation and starting:
 
