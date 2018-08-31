@@ -21,6 +21,10 @@ To send multiple uncompressed pictures and videos with your phone:
 2. Select `File`
 3. Select Gallery (To send images without compression)
 
+
+In group channels the bot expects a command in combination with its username.
+E.g. /start@bot_user_name
+
 Available commands:
 
 /start Start the bot
@@ -34,9 +38,34 @@ Available commands:
 """
 
 
-def event_wrapper(func):
+def get_info_text(subscriber):
+    """Format the info text."""
+    return f"""Current settings:
+
+Name: {subscriber.channel_name}
+Active: {subscriber.active}
+Accepted Media: {subscriber.accepted_media}
+Verbose: {subscriber.verbose}
+Sort files by User: {subscriber.sort_by_user}
+"""
+
+
+def addressed_session_wrapper(func):
     """Wrap a telethon event to create a session and handle exceptions."""
     async def wrapper(event):
+        # Check if this message is meant for us
+        bot_user = await event.client.get_me()
+        username = bot_user.username
+        recipient_string = f'@{username}'
+        _, chat_type = get_chat_information(event.message.to_id)
+
+        # Accept all commands coming directly from a user
+        # Only accept commands send with an recipient string
+        if chat_type != 'user':
+            command = event.message.message.split(' ', maxsplit=1)[0]
+            if recipient_string not in command:
+                return
+
         session = get_session()
         try:
             await func(event, session)
@@ -49,16 +78,42 @@ def event_wrapper(func):
     return wrapper
 
 
-def get_info_text(subscriber):
-    """Format the info text."""
-    return f"""Current settings:
+def session_wrapper(func):
+    """Wrap a telethon event to create a session and handle exceptions."""
+    async def wrapper(event):
+        # Check if this message is meant for us
+        session = get_session()
+        try:
+            await func(event, session)
+        except BaseException:
+            await asyncio.wait([event.respond("Some unknown error occurred.")])
+            traceback.print_exc()
+            sentry.captureException()
+        finally:
+            session.remove()
+    return wrapper
 
-Name: {subscriber.channel_name}
-Active: {subscriber.active}
-Accepted Media: {subscriber.accepted_media}
-Verbose: {subscriber.verbose}
-Sort files by User: {subscriber.sort_by_user}
-"""
+
+def get_username(user):
+    """Get a username from a user."""
+    if user.username:
+        return user.username
+    elif user.first_name:
+        return user.first_name
+    elif user.last_name:
+        return user.last_name
+
+
+def get_chat_information(chat):
+    """Get the id depending on the chat type."""
+    if isinstance(chat, types.PeerUser):
+        return chat.user_id, 'user'
+    elif isinstance(chat, types.PeerChat):
+        return chat.chat_id, 'chat'
+    elif isinstance(chat, types.PeerChannel):
+        return chat.channel_id, 'channel'
+    else:
+        raise Exception("Unknown chat type")
 
 
 def get_channel_path(channel_name):

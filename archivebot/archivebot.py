@@ -1,23 +1,23 @@
 """A bot which downloads various files from chats."""
 import os
 import asyncio
-import traceback
 from telethon import TelegramClient, events
 from telethon import types
 
 from archivebot.config import config
-from archivebot.db import get_session
 from archivebot.subscriber import Subscriber
 from archivebot.file import File
 from archivebot.sentry import sentry
 from archivebot.helper import (
+    addressed_session_wrapper,
     get_bool_from_text,
     get_channel_path,
+    get_chat_information,
     get_file_path,
     get_info_text,
     help_text,
     possible_media,
-    event_wrapper,
+    session_wrapper,
 )
 
 NAME = config.TELEGRAM_BOT_API_KEY.split(':')[0]
@@ -35,7 +35,7 @@ async def help(event):
 
 
 @archive.on(events.NewMessage(pattern='/info'))
-@event_wrapper
+@addressed_session_wrapper
 async def info(event, session):
     """Send a help text."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
@@ -43,8 +43,8 @@ async def info(event, session):
     await asyncio.wait([event.respond(get_info_text(subscriber))])
 
 
-@archive.on(events.NewMessage(pattern='/set_name .'))
-@event_wrapper
+@archive.on(events.NewMessage(pattern='/set_name'))
+@addressed_session_wrapper
 async def set_name(event, session):
     """Set query attributes."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
@@ -77,8 +77,8 @@ async def set_name(event, session):
     session.commit()
 
 
-@archive.on(events.NewMessage(pattern='/verbose .'))
-@event_wrapper
+@archive.on(events.NewMessage(pattern='/verbose'))
+@addressed_session_wrapper
 async def set_verbose(event, session):
     """Set query attributes."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
@@ -98,8 +98,8 @@ async def set_verbose(event, session):
     session.commit()
 
 
-@archive.on(events.NewMessage(pattern='/sort_by_user .'))
-@event_wrapper
+@archive.on(events.NewMessage(pattern='/sort_by_user'))
+@addressed_session_wrapper
 async def set_sort_by_user(event, session):
     """Set query attributes."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
@@ -119,8 +119,8 @@ async def set_sort_by_user(event, session):
     session.commit()
 
 
-@archive.on(events.NewMessage(pattern='/accept .'))
-@event_wrapper
+@archive.on(events.NewMessage(pattern='/accept'))
+@addressed_session_wrapper
 async def accepted_media_types(event, session):
     """Set query attributes."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
@@ -144,7 +144,7 @@ async def accepted_media_types(event, session):
 
 
 @archive.on(events.NewMessage(pattern='/start'))
-@event_wrapper
+@addressed_session_wrapper
 async def start(event, session):
     """Start the bot."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
@@ -159,7 +159,7 @@ async def start(event, session):
 
 
 @archive.on(events.NewMessage(pattern='/stop'))
-@event_wrapper
+@addressed_session_wrapper
 async def stop(event, session):
     """Stop the bot."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
@@ -174,7 +174,7 @@ async def stop(event, session):
 
 
 @archive.on(events.NewMessage())
-@event_wrapper
+@session_wrapper
 async def process(event, session):
     """Check if we received any files."""
     message = event.message
@@ -221,27 +221,6 @@ async def process(event, session):
         new_file.success = True
     session.commit()
 
-
-def get_username(user):
-    """Get a username from a user."""
-    if user.username:
-        return user.username
-    elif user.first_name:
-        return user.first_name
-    elif user.last_name:
-        return user.last_name
-
-
-def get_chat_information(chat):
-    """Get the id depending on the chat type."""
-    if isinstance(chat, types.PeerUser):
-        return chat.user_id, 'user'
-    elif isinstance(chat, types.PeerChat):
-        return chat.chat_id, 'chat'
-    elif isinstance(chat, types.PeerChannel):
-        return chat.channel_id, 'channel'
-    else:
-        raise Exception("Unknown chat type")
 
 
 async def get_file_information(event, message, subscriber, user):

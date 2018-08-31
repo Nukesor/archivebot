@@ -35,7 +35,9 @@ Finally execute following commands to install all dependencies, initialize the d
     % ./main.py
 
 
-## Available commands:
+## Commands:
+In group channels the bot expects a command in combination with its username.
+E.g. /start@bot_user_name
 
     /start Start the bot
     /stop Stop the bot
@@ -45,3 +47,17 @@ Finally execute following commands to install all dependencies, initialize the d
     /sort_by_user [true, false]
     /info Show current settings.
     /help Show this text
+
+
+
+### Botfather commands:
+These are the command descriptions formatted for the botfather, in case you want to host your own bot
+
+    start - Start archiving Files for this chat
+    stop - Stop archiving Files for this chat
+    set_name - Set the name for this channel. Dafault is chat_id. Nice for better file sorting on the server side.
+    sort_by_user - ['true', 'false'] Incoming files will be sorted by user in the server directory for this chat.
+    accept - ['document', 'photo'] Specify the allowed media types. Example: /accept document photo
+    verbose - ['true', 'false'] The bot will notify if there are duplicate files or uncompressed images are not allowed.
+    info - Show current settings.
+    help - Show the help text.
