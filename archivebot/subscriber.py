@@ -29,6 +29,6 @@ class Subscriber(base):
             subscriber = Subscriber(chat_id, chat_type, channel_name)
             session.add(subscriber)
             session.commit()
-            subscriber = session.query(Subscriber).get(chat_id)
+            subscriber = session.query(Subscriber).get((chat_id, chat_type))
 
         return subscriber
