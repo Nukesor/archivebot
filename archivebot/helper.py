@@ -6,9 +6,11 @@ from telethon import types
 
 help_text = """A handy telegram bot which allows to store files on your server, which are posted in a group chat or a normal chat.
 
-This is great to collect images from your last holiday trip or simply to push backups or interesting files from your telegram to your server.
+This is great to collect images and videos from your last holiday trip or simply to push backups or interesting files from your telegram to your server.
 
-To send uncompressed pictures with your handy:
+If you forward messages from other chats, the file will still be saved under the name of the original owner
+
+To send multiple uncompressed pictures and videos with your handy:
 1. Click the share button
 2. Select `File`
 3. Select Gallery (To send images without compression)
@@ -18,33 +20,22 @@ Available commands:
 /start Start the bot
 /stop Stop the bot
 /set_name Set the name for this chat. This also determines the name of the target folder on the server.
+/verbose [true, false]
 /help Show this text
 """
 
 
-def get_chat_id(chat):
-    """Get the id depending on the chat type."""
-    if isinstance(chat, types.PeerUser):
-        return chat.user_id
-    elif isinstance(chat, types.PeerChat):
-        return chat.chat_id
-    elif isinstance(chat, types.PeerChannel):
-        return chat.channel_id
-    else:
-        raise Exception("Unknown chat type")
+def get_channel_path(channel_name):
+    """Compile the directory path for this channel."""
+    return os.path.join(config.TARGET_DIR, channel_name)
 
 
-def get_group_path(group_name):
-    """Compile the directory path for this group."""
-    return os.path.join(config.TARGET_DIR, group_name)
-
-
-def get_file_path(subscriber, user, media):
+def get_file_path(subscriber, username, media):
     """Compile the file path and ensure the parent directories exist."""
     # Create user directory
     user_path = os.path.join(
-        get_group_path(subscriber.group_name),
-        user.username.lower(),
+        get_channel_path(subscriber.channel_name),
+        username.lower(),
     )
     if not os.path.exists(user_path):
         os.makedirs(user_path, exist_ok=True)
@@ -58,4 +49,14 @@ def get_file_path(subscriber, user, media):
 
     # We have a photo. Photos have no file name, thereby return the directory
     # and let telethon decide the name of the file.
-    return (user_path, 'undefined')
+    return (user_path, None)
+
+
+def get_bool_from_text(text):
+    """Check if we can convert this string to bool."""
+    if text.lower() in ['1', 'true', 'on']:
+        return True
+    elif text.lower() in ['0', 'false', 'off']:
+        return False
+    else:
+        raise Exception("Unknown boolean text")
