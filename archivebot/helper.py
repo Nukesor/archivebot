@@ -1,7 +1,12 @@
 """Some static stuff or helper functions for archive bot."""
 import os
-from archivebot.config import config
+import asyncio
+import traceback
 from telethon import types
+
+from archivebot.db import get_session
+from archivebot.sentry import sentry
+from archivebot.config import config
 
 
 possible_media = ['document', 'photo']
@@ -29,6 +34,21 @@ Available commands:
 """
 
 
+def event_wrapper(func):
+    """Wrap a telethon event to create a session and handle exceptions."""
+    async def wrapper(event):
+        session = get_session()
+        try:
+            await func(event, session)
+        except BaseException:
+            await asyncio.wait([event.respond("Some unknown error occurred.")])
+            traceback.print_exc()
+            sentry.captureException()
+        finally:
+            session.remove()
+    return wrapper
+
+
 def get_info_text(subscriber):
     """Format the info text."""
     return f"""Current settings:
@@ -50,26 +70,28 @@ def get_file_path(subscriber, username, media):
     """Compile the file path and ensure the parent directories exist."""
     # If we don't sort by user, use the channel_path
     if not subscriber.sort_by_user:
-        user_path = get_channel_path(subscriber.channel_name)
-    # Create user directory
+        directory = get_channel_path(subscriber.channel_name)
+    # sort_by_user is active. Add the user directory.
     else:
-        user_path = os.path.join(
+        directory = os.path.join(
             get_channel_path(subscriber.channel_name),
             username.lower(),
         )
-    if not os.path.exists(user_path):
-        os.makedirs(user_path, exist_ok=True)
+
+    # Create the directory
+    if not os.path.exists(directory):
+        os.makedirs(directory, exist_ok=True)
 
     # We have a document. Documents have a filename attribute.
     # Use this for choosing the exact file path.
     if media.document:
         for attribute in media.document.attributes:
             if isinstance(attribute, types.DocumentAttributeFilename):
-                return (os.path.join(user_path, attribute.file_name), attribute.file_name)
+                return (os.path.join(directory, attribute.file_name), attribute.file_name)
 
     # We have a photo. Photos have no file name, thereby return the directory
     # and let telethon decide the name of the file.
-    return (user_path, None)
+    return (directory, None)
 
 
 def get_bool_from_text(text):
