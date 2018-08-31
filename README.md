@@ -17,6 +17,7 @@ To send multiple uncompressed pictures and videos with your phone:
 - Only accept specified media types.
 - Properly handle forwarded messages (If sort_by_user is enabled, the original sender will be used).
 
+![Pueue](https://raw.githubusercontent.com/Nukesor/images/master/archivebot_example.png)
 
 ## Installation and starting:
 
@@ -32,7 +33,6 @@ Finally execute following commands to install all dependencies, initialize the d
     % ./initdb.py
     % ./main.py
 
-
 ## Commands:
 In group channels the bot expects a command in combination with its username.
 E.g. /start@bot_user_name
@@ -45,7 +45,6 @@ E.g. /start@bot_user_name
     /accept ['document', 'photo'] Specify the accepted media Example: '/accept document photo'
     /info Show current settings.
     /help Show this text
-
 
 
 ### Botfather commands:
