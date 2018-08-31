@@ -1,10 +1,8 @@
 # Archive-Bot
 
-A handy telegram bot which allows to store files on your server, which are posted in a chat.
+A handy bot which enables to download files from telegram chats to your server.
 
-For example, this is great to collect images and videos from all members of your last holiday trip or simply to push backups or interesting files from your telegram chats to your server.
-
-If you forward messages from other chats and `sort_by_user` is on, the file will still be saved under the name of the original owner.
+For instance, this is great to collect images and videos from the members of your last holiday trip or to simply push backups or interesting files from your telegram chats to your server.
 
 To send multiple uncompressed pictures and videos with your phone:
 1. Click the share button
@@ -14,10 +12,10 @@ To send multiple uncompressed pictures and videos with your phone:
 ## Features:
 
 - Custom name for chats for easier server file management.
-- By default sorts incoming files by user and chat, but this can be disabled.
-- Verbose option to notify users of duplicates or compressed images.
-- Filtering of accepted media types.
-- Proper handling of forwarded messages
+- By default, archive bot sorts incoming files by chat and then by user. The sort by user can be disabled.
+- Verbose option for notifying users of duplicates or compressed images.
+- Only accept specified media types.
+- Properly handle forwarded messages (If sort_by_user is enabled, the original sender will be used).
 
 
 ## Installation and starting:
@@ -42,9 +40,9 @@ E.g. /start@bot_user_name
     /start Start the bot
     /stop Stop the bot
     /set_name Set the name for this chat. This also determines the name of the target folder on the server.
-    /verbose [true, false]
-    /accept  Specify the allowed media types. Always provide a space separated list of all accepted media types, e.g. 'document photo'.
-    /sort_by_user [true, false]
+    /verbose ['true', 'false'] The bot will complain if there are duplicate files or uncompressed images are sent, whilst not being accepted.
+    /sort_by_user ['true', 'false'] Incoming files will be sorted by user in the server directory for this chat.
+    /accept ['document', 'photo'] Specify the accepted media Example: '/accept document photo'
     /info Show current settings.
     /help Show this text
 
@@ -55,9 +53,9 @@ These are the command descriptions formatted for the botfather, in case you want
 
     start - Start archiving Files for this chat
     stop - Stop archiving Files for this chat
-    set_name - Set the name for this channel. Dafault is chat_id. Nice for better file sorting on the server side.
+    set_name - Set the name for this chat. This also determines the name of the target folder on the server.
     sort_by_user - ['true', 'false'] Incoming files will be sorted by user in the server directory for this chat.
-    accept - ['document', 'photo'] Specify the allowed media types. Example: /accept document photo
-    verbose - ['true', 'false'] The bot will notify if there are duplicate files or uncompressed images are not allowed.
+    accept - ['document', 'photo'] Specify the allowed media types. Example: `/accept document photo`
+    verbose - ['true', 'false'] The bot will complain if there are duplicate files or uncompressed images are sent, whilst not being accepted.
     info - Show current settings.
     help - Show the help text.

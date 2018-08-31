@@ -15,6 +15,7 @@ from archivebot.helper import (
     get_chat_information,
     get_file_path,
     get_info_text,
+    get_username,
     help_text,
     possible_media,
     session_wrapper,
