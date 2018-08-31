@@ -1,10 +1,10 @@
 # Archive-Bot
 
-A handy telegram bot which allows to store files on your server, which are posted in a group chat or a normal chat.
+A handy telegram bot which allows to store files on your server, which are posted in a chat.
 
-This is great to collect images and videos from your last holiday trip or simply to push backups or interesting files from your telegram to your server.
+For example, this is great to collect images and videos from all members of your last holiday trip or simply to push backups or interesting files from your telegram chats to your server.
 
-If you forward messages from other chats, the file will still be saved under the name of the original owner
+If you forward messages from other chats and `sort_by_user` is on, the file will still be saved under the name of the original owner.
 
 To send multiple uncompressed pictures and videos with your phone:
 1. Click the share button
@@ -43,4 +43,5 @@ Finally execute following commands to install all dependencies, initialize the d
     /verbose [true, false]
     /accept  Specify the allowed media types. Always provide a space separated list of all accepted media types, e.g. 'document photo'.
     /sort_by_user [true, false]
+    /info Show current settings.
     /help Show this text

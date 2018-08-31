@@ -12,8 +12,9 @@ from archivebot.file import File
 from archivebot.sentry import sentry
 from archivebot.helper import (
     get_bool_from_text,
-    get_file_path,
     get_channel_path,
+    get_file_path,
+    get_info_text,
     help_text,
     possible_media,
 )
@@ -30,6 +31,21 @@ if not os.path.exists(config.TARGET_DIR):
 async def help(event):
     """Send a help text."""
     await asyncio.wait([event.respond(help_text)])
+
+
+@archive.on(events.NewMessage(pattern='/info'))
+async def info(event):
+    """Send a help text."""
+    session = get_session()
+    try:
+        chat_id, chat_type = get_chat_information(event.message.to_id)
+        subscriber = Subscriber.get_or_create(session, chat_id, chat_type, chat_id)
+        await asyncio.wait([event.respond(get_info_text(subscriber))])
+    except BaseException:
+        traceback.print_exc()
+        sentry.captureException()
+    finally:
+        session.remove()
 
 
 @archive.on(events.NewMessage(pattern='/set_name .'))
@@ -80,10 +96,35 @@ async def set_verbose(event):
             return await asyncio.wait([event.respond(text)])
 
         subscriber.verbose = value
-        if value:
-            text = f"I'm now configured to be verbose."
-        else:
-            text = f"I'm now configured to be sneaky."
+        text = f"I'm now configured to be {'verbose' if value else 'sneaky'}."
+        await asyncio.wait([event.respond(text)])
+
+        session.commit()
+    except BaseException:
+        await asyncio.wait([event.respond("Some unknown error occurred.")])
+        traceback.print_exc()
+        sentry.captureException()
+    finally:
+        session.remove()
+
+
+@archive.on(events.NewMessage(pattern='/sort_by_user .'))
+async def set_sort_by_user(event):
+    """Set query attributes."""
+    session = get_session()
+    try:
+        chat_id, chat_type = get_chat_information(event.message.to_id)
+        subscriber = Subscriber.get_or_create(session, chat_id, chat_type, chat_id)
+
+        # Convert the incoming text into an boolean
+        try:
+            value = get_bool_from_text(event.message.message.split(' ', maxsplit=1)[1])
+        except Exception:
+            text = "Got an invalid value. Please use one of [true, false, on, off, 0, 1]"
+            return await asyncio.wait([event.respond(text)])
+
+        subscriber.sort_by_user = value
+        text = f"{'Sorting' if value else 'Not sorting'} by user."
         await asyncio.wait([event.respond(text)])
 
         session.commit()
@@ -141,6 +182,7 @@ async def start(event):
         text = 'Files posted in this channel will now be archived.'
         await asyncio.wait([event.respond(text)])
     except BaseException:
+        await asyncio.wait([event.respond("Some unknown error occurred.")])
         traceback.print_exc()
         sentry.captureException()
     finally:
@@ -162,6 +204,7 @@ async def stop(event):
         text = "Files won't be archived any longer."
         await asyncio.wait([event.respond(text)])
     except BaseException:
+        await asyncio.wait([event.respond("Some unknown error occurred.")])
         traceback.print_exc()
         sentry.captureException()
     finally:
@@ -215,6 +258,7 @@ async def process(event):
             new_file.success = True
         session.commit()
     except Exception:
+        await asyncio.wait([event.respond("Some unknown error occurred.")])
         traceback.print_exc()
         sentry.captureException()
     finally:

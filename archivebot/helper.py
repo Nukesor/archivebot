@@ -6,10 +6,10 @@ from telethon import types
 
 possible_media = ['document', 'photo']
 
-help_text = f"""A handy telegram bot which allows to store files on your server, which are posted in a group chat or a normal chat.
-For instance, this is great to collect images and videos from your last holiday trip or simply to push backups or interesting files from your telegram chats to your server.
+help_text = f"""A handy telegram bot which allows to store files on your server, which are posted in a chat.
+For example, this is great to collect images and videos from all members of your last holiday trip or simply to push backups or interesting files from your telegram chats to your server.
 
-If you forward messages from other chats, the file will still be saved under the name of the original owner
+If you forward messages from other chats and `sort_by_user` is on, the file will still be saved under the name of the original owner.
 
 To send multiple uncompressed pictures and videos with your phone:
 1. Click the share button
@@ -22,8 +22,22 @@ Available commands:
 /stop Stop the bot
 /set_name Set the name for this chat. This also determines the name of the target folder on the server.
 /verbose ['true', 'false'] The bot will notify if there are duplicate files or uncompressed images are not allowed.
+/sort_by_user [true, false] Incoming files will be sorted by user in the server directory for this chat.
 /accept {possible_media} Specify the allowed media types. Always provide a space separated list of all accepted media types, e.g. 'document photo'.
+/info Show current settings.
 /help Show this text
+"""
+
+
+def get_info_text(subscriber):
+    """Format the info text."""
+    return f"""Current settings:
+
+Name: {subscriber.channel_name}
+Active: {subscriber.active}
+Accepted Media: {subscriber.accepted_media}
+Verbose: {subscriber.verbose}
+Sort files by User: {subscriber.sort_by_user}
 """
 
 
@@ -34,11 +48,15 @@ def get_channel_path(channel_name):
 
 def get_file_path(subscriber, username, media):
     """Compile the file path and ensure the parent directories exist."""
+    # If we don't sort by user, use the channel_path
+    if not subscriber.sort_by_user:
+        user_path = get_channel_path(subscriber.channel_name)
     # Create user directory
-    user_path = os.path.join(
-        get_channel_path(subscriber.channel_name),
-        username.lower(),
-    )
+    else:
+        user_path = os.path.join(
+            get_channel_path(subscriber.channel_name),
+            username.lower(),
+        )
     if not os.path.exists(user_path):
         os.makedirs(user_path, exist_ok=True)
 
