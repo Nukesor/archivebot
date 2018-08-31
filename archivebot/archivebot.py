@@ -2,23 +2,25 @@
 import os
 import asyncio
 from telethon import TelegramClient, events
-from telethon import types
 
 from archivebot.config import config
 from archivebot.subscriber import Subscriber
 from archivebot.file import File
-from archivebot.sentry import sentry
 from archivebot.helper import (
     addressed_session_wrapper,
     get_bool_from_text,
-    get_channel_path,
     get_chat_information,
-    get_file_path,
     get_info_text,
     get_username,
     help_text,
     possible_media,
     session_wrapper,
+    should_accept_message,
+)
+from archivebot.file_helper import (
+    check_if_file_exists,
+    get_channel_path,
+    get_file_path,
 )
 
 NAME = config.TELEGRAM_BOT_API_KEY.split(':')[0]
@@ -223,7 +225,6 @@ async def process(event, session):
     session.commit()
 
 
-
 async def get_file_information(event, message, subscriber, user):
     """Check whether we got an allowed file type."""
     file_id = None
@@ -247,45 +248,6 @@ async def get_file_information(event, message, subscriber, user):
         file_id = message.document.id
 
     return file_type, file_id
-
-
-def should_accept_message(subscriber, message, user):
-    """Check if we should accept this message."""
-    if subscriber.active is False:
-        return False
-
-    # No media => not interesting
-    if message.media is None:
-        return False
-
-    # We only want messages from users
-    if not isinstance(user, types.User):
-        return False
-
-    return True
-
-
-async def check_if_file_exists(event, file_path, file_name, subscriber, user):
-    """Check whether the filename already exists."""
-    if not os.path.isdir(file_path) and os.path.exists(file_path):
-        # Inform the user about duplicate files
-        if subscriber.verbose:
-            text = f"File with name {file_name} already exists."
-            await asyncio.wait([event.respond(text)])
-
-        sentry.captureMessage(
-            "File already exists",
-            extra={
-                'file_path': file_path,
-                'file_name': file_name,
-                'channel': subscriber.channel_name,
-                'user': get_username(user),
-            },
-            tags={'level': 'info'},
-        )
-        return True
-
-    False
 
 
 archive.start(bot_token=config.TELEGRAM_BOT_API_KEY)
