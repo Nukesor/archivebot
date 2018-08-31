@@ -1,4 +1,4 @@
-"""Helper class to get a database engine and to get a session."""
+"""Helper class to create a database engine and to get a session."""
 from archivebot.config import config
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session
