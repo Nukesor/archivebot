@@ -49,48 +49,37 @@ Sort files by User: {subscriber.sort_by_user}
 """
 
 
-def addressed_session_wrapper(func):
-    """Wrap a telethon event to create a session and handle exceptions."""
-    async def wrapper(event):
-        # Check if this message is meant for us
-        bot_user = await event.client.get_me()
-        username = bot_user.username
-        recipient_string = f'@{username}'
-        _, chat_type = get_chat_information(event.message.to_id)
+def session_wrapper(addressed=True):
+    """Allow to differentiate between addressed commands and all messages."""
+    def real_session_wrapper(func):
+        """Wrap a telethon event to create a session and handle exceptions."""
+        async def wrapper(event):
+            if addressed:
+                # Check if this message is meant for us
+                bot_user = await event.client.get_me()
+                username = bot_user.username
+                recipient_string = f'@{username}'
+                _, chat_type = get_chat_information(event.message.to_id)
 
-        # Accept all commands coming directly from a user
-        # Only accept commands send with an recipient string
-        if chat_type != 'user':
-            command = event.message.message.split(' ', maxsplit=1)[0]
-            if recipient_string not in command:
-                return
+                # Accept all commands coming directly from a user
+                # Only accept commands send with an recipient string
+                if chat_type != 'user':
+                    command = event.message.message.split(' ', maxsplit=1)[0]
+                    if recipient_string not in command:
+                        return
 
-        session = get_session()
-        try:
-            await func(event, session)
-        except BaseException:
-            await asyncio.wait([event.respond("Some unknown error occurred.")])
-            traceback.print_exc()
-            sentry.captureException()
-        finally:
-            session.remove()
-    return wrapper
+            session = get_session()
+            try:
+                await func(event, session)
+            except BaseException:
+                await asyncio.wait([event.respond("Some unknown error occurred.")])
+                traceback.print_exc()
+                sentry.captureException()
+            finally:
+                session.remove()
+        return wrapper
 
-
-def session_wrapper(func):
-    """Wrap a telethon event to create a session and handle exceptions."""
-    async def wrapper(event):
-        # Check if this message is meant for us
-        session = get_session()
-        try:
-            await func(event, session)
-        except BaseException:
-            await asyncio.wait([event.respond("Some unknown error occurred.")])
-            traceback.print_exc()
-            sentry.captureException()
-        finally:
-            session.remove()
-    return wrapper
+    return real_session_wrapper
 
 
 def get_username(user):

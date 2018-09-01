@@ -6,7 +6,6 @@ from archivebot.config import config
 from archivebot.subscriber import Subscriber
 from archivebot.file import File
 from archivebot.helper import (
-    addressed_session_wrapper,
     get_bool_from_text,
     get_chat_information,
     get_info_text,
@@ -37,7 +36,7 @@ async def help(event):
 
 
 @archive.on(events.NewMessage(pattern='/info'))
-@addressed_session_wrapper
+@session_wrapper()
 async def info(event, session):
     """Send a help text."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
@@ -46,7 +45,7 @@ async def info(event, session):
 
 
 @archive.on(events.NewMessage(pattern='/set_name'))
-@addressed_session_wrapper
+@session_wrapper()
 async def set_name(event, session):
     """Set query attributes."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
@@ -80,7 +79,7 @@ async def set_name(event, session):
 
 
 @archive.on(events.NewMessage(pattern='/verbose'))
-@addressed_session_wrapper
+@session_wrapper()
 async def set_verbose(event, session):
     """Set query attributes."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
@@ -101,7 +100,7 @@ async def set_verbose(event, session):
 
 
 @archive.on(events.NewMessage(pattern='/sort_by_user'))
-@addressed_session_wrapper
+@session_wrapper()
 async def set_sort_by_user(event, session):
     """Set query attributes."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
@@ -122,7 +121,7 @@ async def set_sort_by_user(event, session):
 
 
 @archive.on(events.NewMessage(pattern='/accept'))
-@addressed_session_wrapper
+@session_wrapper()
 async def accepted_media_types(event, session):
     """Set query attributes."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
@@ -146,7 +145,7 @@ async def accepted_media_types(event, session):
 
 
 @archive.on(events.NewMessage(pattern='/start'))
-@addressed_session_wrapper
+@session_wrapper()
 async def start(event, session):
     """Start the bot."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
@@ -161,7 +160,7 @@ async def start(event, session):
 
 
 @archive.on(events.NewMessage(pattern='/stop'))
-@addressed_session_wrapper
+@session_wrapper()
 async def stop(event, session):
     """Stop the bot."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
@@ -176,7 +175,7 @@ async def stop(event, session):
 
 
 @archive.on(events.NewMessage())
-@session_wrapper
+@session_wrapper(addressed=False)
 async def process(event, session):
     """Check if we received any files."""
     message = event.message
