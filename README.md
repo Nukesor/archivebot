@@ -1,7 +1,9 @@
 # Archive-Bot
 
-A handy bot which enables to download files from telegram chats to your server. It features a full scan of all files ever posted as well as a continuous scan of incoming messages.
-A zip archive can be then be created and posted into each chat with a single command at any time.
+A handy bot which enables to download files from telegram chats to your server.
+
+It features a full backup of all files posted in a chat and a continuous backup of incoming new media.
+A zip archive can be then be created and uploaded into the Telegram chat with a single command at any time.
 
 For instance, this is great to collect images and videos from the members of your last holiday trip or to simply push backups or interesting files from your telegram chats to your server.
 
@@ -15,10 +17,10 @@ To send multiple uncompressed pictures and videos with your phone:
 - Zip all files and post it into the chat with the simple `/zip` command.
 - Clear all files from the server with a simple `/clear_history` command.
 - Scan the whole chat with `scan_chat` (Bot needs to be logged in as a normal user for this feature).
-- Only accept specified media types.
-- Custom name for chats for easier server file management.
-- By default, archive bot sorts incoming files by chat and then by user. `sort_by_user` can be disabled.
-- Properly handle forwarded messages (If `sort_by_user` is enabled, the original sender will be used).
+- Configure your accept specified media types.
+- Set a custom name for each chat for easier server file management and naming of the zip file.
+- Automatic sorting of files by chat and user. `sort_by_user` can be disabled.
+- Properly handles forwarded messages (If `sort_by_user` is enabled, the original sender will be used).
 - Verbose option for notifying users of duplicates or compressed images.
 
 <p align="center">
