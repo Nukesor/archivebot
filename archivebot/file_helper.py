@@ -1,5 +1,6 @@
 """Helper module for file helper."""
 import os
+import subprocess
 from telethon import types
 from datetime import datetime
 
@@ -55,6 +56,20 @@ def get_channel_path(channel_name):
     return os.path.join(config.TARGET_DIR, channel_name)
 
 
+def init_zip_dir():
+    """Compile the directory path for this channel."""
+    zip_dir = os.path.join(config.TARGET_DIR, 'zips')
+    if not os.path.exists(zip_dir):
+        os.mkdir(zip_dir)
+
+    return zip_dir
+
+
+def get_zip_file_path(channel_name):
+    """Compile the directory path for this channel."""
+    return os.path.join(config.TARGET_DIR, 'zips', channel_name)
+
+
 def get_file_path(subscriber, username, message):
     """Compile the file path and ensure the parent directories exist."""
     # If we don't sort by user, use the channel_path
@@ -95,13 +110,14 @@ def get_file_path(subscriber, username, message):
     return (file_path, file_name)
 
 
-def find_file_name(directory, original_file_name):
+def find_file_name(directory, file_name):
     """Find a file name which doesn't exist yet."""
     counter = 1
-    file_name = f"{original_file_name}_{counter}"
+    original_filename, extension = os.path.splitext()
+    file_name = f"{file_name}_{counter}{extension}"
     while os.path.exists(os.path.join(directory, file_name)):
         counter += 1
-        file_name = f"{original_file_name}_{counter}"
+        file_name = f"{file_name}_{counter}{extension}"
 
     return file_name
 
@@ -129,3 +145,11 @@ async def get_file_information(event, message, subscriber, user):
         file_id = message.document.id
 
     return file_type, file_id
+
+
+def create_zips(channel_name, zip_dir, target_dir):
+    """Create a zip file from given dir path."""
+    file_name = os.path.join(zip_dir, channel_name)
+    command = ["7z", "-v1200m", "a", f"{file_name}.7z", target_dir]
+
+    subprocess.run(command)

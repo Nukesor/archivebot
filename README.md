@@ -1,6 +1,7 @@
 # Archive-Bot
 
-A handy bot which enables to download files from telegram chats to your server.
+A handy bot which enables to download files from telegram chats to your server. It features a full scan of all files ever posted as well as a continuous scan of incoming messages.
+A zip archive can be then be created and posted into each chat with a single command at any time.
 
 For instance, this is great to collect images and videos from the members of your last holiday trip or to simply push backups or interesting files from your telegram chats to your server.
 
@@ -11,11 +12,14 @@ To send multiple uncompressed pictures and videos with your phone:
 
 ## Features:
 
-- Custom name for chats for easier server file management.
-- By default, archive bot sorts incoming files by chat and then by user. The sort by user can be disabled.
-- Verbose option for notifying users of duplicates or compressed images.
+- Zip all files and post it into the chat with the simple `/zip` command.
+- Clear all files from the server with a simple `/clear_history` command.
+- Scan the whole chat with `scan_chat` (Bot needs to be logged in as a normal user for this feature).
 - Only accept specified media types.
-- Properly handle forwarded messages (If sort_by_user is enabled, the original sender will be used).
+- Custom name for chats for easier server file management.
+- By default, archive bot sorts incoming files by chat and then by user. `sort_by_user` can be disabled.
+- Properly handle forwarded messages (If `sort_by_user` is enabled, the original sender will be used).
+- Verbose option for notifying users of duplicates or compressed images.
 
 <p align="center">
     <img src="https://raw.githubusercontent.com/Nukesor/images/master/archivebot_example.png">
@@ -50,7 +54,8 @@ E.g. /start@bot_user_name
 
     /start Start the bot
     /stop Stop the bot
-    /clear Clear all files from the server.
+    /clear_history Clear all files from the server.
+    /zip Create a zip file of all files on the server
     /set_name Set the name for this chat. This also determines the name of the target folder on the server.
     /scan_chat Scan the whole chat history for files to back up.
     /accept ['document', 'photo'] Specify the accepted media Example: '/accept document photo'
@@ -66,7 +71,8 @@ These are the command descriptions formatted for the botfather, in case you want
 
     start - Start archiving Files for this chat
     stop - Stop archiving Files for this chat
-    clear - Clear all files from the server.
+    clear_history - Clear all files from the server.
+    zip - Create a zip file of all files on the server.
     set_name - Set the name for this chat. This also determines the name of the target folder on the server.
     scan_chat - Scan the whole chat history for files to back up.
     accept - ['document', 'photo'] Specify the allowed media types. Example: `/accept document photo`

@@ -29,7 +29,8 @@ Available commands:
 
 /start Start the bot
 /stop Stop the bot
-/clear - Clear all files from the server.
+/clear_history - Clear all files from the server.
+/zip Create a zip file of all files on the server
 /set_name Set the name for this chat. This also determines the name of the target folder on the server.
 /scan_chat Scan the whole chat history for files to back up.
 /verbose ['true', 'false'] The bot will complain if there are duplicate files or uncompressed images are sent, whilst not being accepted.
@@ -139,13 +140,18 @@ def get_bool_from_text(text):
         raise Exception("Unknown boolean text")
 
 
-def should_accept_message(subscriber, message, user):
+async def should_accept_message(event, message, user, subscriber):
     """Check if we should accept this message."""
     if subscriber.active is False:
         return False
 
     # No media => not interesting
     if message.media is None:
+        return False
+
+    # Don't check messages from ourselves
+    me = await event.client.get_me()
+    if message.from_id == me.id:
         return False
 
     # We only want messages from users

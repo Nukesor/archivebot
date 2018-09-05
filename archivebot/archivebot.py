@@ -17,7 +17,9 @@ from archivebot.helper import (
 )
 from archivebot.file_helper import (
     create_file,
+    create_zips,
     get_channel_path,
+    init_zip_dir,
 )
 
 if config.TELEGRAM_BOT_API_KEY is None:
@@ -53,7 +55,10 @@ async def info(event, session):
 async def set_name(event, session):
     """Set query attributes."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
-    channel_name = event.message.message.split(' ', maxsplit=1)[1]
+    channel_name = event.message.message.split(' ', maxsplit=1)[1].strip()
+    if channel_name == 'zips':
+        return "Invalid channel name. Pick another."
+
     subscriber = Subscriber.get_or_create(session, chat_id, chat_type, channel_name)
 
     old_channel_path = get_channel_path(subscriber.channel_name)
@@ -188,6 +193,32 @@ async def scan_chat(event, session):
     async for message in archive.iter_messages(event.message.to_id):
         await process_message(session, subscriber, message, event)
 
+    return "Chat scan successful ."
+
+
+@archive.on(events.NewMessage(pattern='/zip'))
+@session_wrapper()
+async def zip(event, session):
+    """Check if we received any files."""
+    chat_id, chat_type = get_chat_information(event.message.to_id)
+    subscriber = Subscriber.get_or_create(session, chat_id, chat_type, chat_id)
+
+    channel_path = get_channel_path(subscriber.channel_name)
+    if not os.path.exists(channel_path):
+        return "No files for this channel yet."
+
+    zip_dir = init_zip_dir()
+
+    create_zips(subscriber.channel_name, zip_dir, channel_path)
+
+    for zip_file in os.listdir(zip_dir):
+        zip_file_path = os.path.join(zip_dir, zip_file)
+        await archive.send_file(event.message.to_id, zip_file_path)
+
+    shutil.rmtree(zip_dir)
+
+    return "Zip files created"
+
 
 @archive.on(events.NewMessage())
 @session_wrapper(addressed=False)
@@ -210,7 +241,7 @@ async def process_message(session, subscriber, message, event):
         user = await archive.get_entity(message.from_id)
 
     # Check if we should accept this message
-    if not should_accept_message(subscriber, message, user):
+    if not await should_accept_message(event, message, user, subscriber):
         return
 
     # Create a new file. If it's not possible or not wanted, return None
