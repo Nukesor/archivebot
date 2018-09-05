@@ -1,7 +1,7 @@
 """Helper module for file helper."""
 import os
 from telethon import types
-from Datetime import Datetime
+from datetime import datetime
 
 from archivebot.config import config
 from archivebot.sentry import sentry
@@ -88,7 +88,7 @@ def get_file_path(subscriber, username, message):
                 file_path = os.path.join(directory, file_name)
                 return (file_path, file_name)
 
-    file_name = Datetime.now().strftime('media_%Y-%m-%d_%H-%M-%S')
+    file_name = datetime.now().strftime('media_%Y-%m-%d_%H-%M-%S')
     file_path = os.path.join(directory, file_name)
     # We have a photo. Photos have no file name, thereby return the directory
     # and let telethon decide the name of the file.

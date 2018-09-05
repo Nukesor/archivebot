@@ -6,6 +6,7 @@ class Config:
 
     # Get your telegram api-key from @botfather
     TELEGRAM_BOT_API_KEY = None
+    TELEGRAM_PHONE_NUMBER = None
 
     # Get client api keys from https://my.telegram.org
     TELEGRAM_APP_API_ID = None

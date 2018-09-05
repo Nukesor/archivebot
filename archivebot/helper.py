@@ -31,6 +31,7 @@ Available commands:
 /stop Stop the bot
 /clear - Clear all files from the server.
 /set_name Set the name for this chat. This also determines the name of the target folder on the server.
+/scan_chat Scan the whole chat history for files to back up.
 /verbose ['true', 'false'] The bot will complain if there are duplicate files or uncompressed images are sent, whilst not being accepted.
 /sort_by_user [true, false] Incoming files will be sorted by user in the server directory for this chat.
 /accept {possible_media} Specify the allowed media types. Always provide a space separated list of all accepted media types, e.g. 'document photo'.

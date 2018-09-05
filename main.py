@@ -1,5 +1,5 @@
 #!/bin/env python
 """Start the bot."""
-from archivebot.archivebot import archive
+from archivebot.archivebot import main
 
-archive.run_until_disconnected()
+main()

@@ -20,7 +20,11 @@ from archivebot.file_helper import (
     get_channel_path,
 )
 
-NAME = config.TELEGRAM_BOT_API_KEY.split(':')[0]
+if config.TELEGRAM_BOT_API_KEY is None:
+    NAME = 'archivebot'
+else:
+    NAME = config.TELEGRAM_BOT_API_KEY.split(':')[0]
+
 archive = TelegramClient(NAME, config.TELEGRAM_APP_API_ID, config.TELEGRAM_APP_API_HASH)
 
 # Ensure save directory for files exists
@@ -173,19 +177,30 @@ async def clear_history(event, session):
     return "All files from this chat have been deleted."
 
 
+@archive.on(events.NewMessage(pattern='/scan_chat'))
+@session_wrapper(addressed=False)
+async def scan_chat(event, session):
+    """Check if we received any files."""
+    chat_id, chat_type = get_chat_information(event.message.to_id)
+    subscriber = Subscriber.get_or_create(session, chat_id, chat_type, chat_id)
+
+    async for message in archive.iter_messages(event.message.to_id):
+        await process_message(session, subscriber, message, event)
+
+
 @archive.on(events.NewMessage())
 @session_wrapper(addressed=False)
 async def process(event, session):
     """Check if we received any files."""
-    message = event.message
-
-    await process_message(message, session, event)
-
-
-async def process_message(message, session, event):
-    """Process a single message."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
     subscriber = Subscriber.get_or_create(session, chat_id, chat_type, chat_id)
+
+    await process_message(session, subscriber, event.message, event)
+
+
+async def process_message(session, subscriber, message, event):
+    """Process a single message."""
+    chat_id, chat_type = get_chat_information(message.to_id)
 
     # If this message is forwarded, get the original sender.
     if message.forward:
@@ -213,4 +228,11 @@ async def process_message(message, session, event):
     session.commit()
 
 
-archive.start(bot_token=config.TELEGRAM_BOT_API_KEY)
+def main():
+    """Login and start the bot."""
+    if config.TELEGRAM_BOT_API_KEY is None:
+        archive.start(phone=config.TELEGRAM_PHONE_NUMBER)
+    else:
+        archive.start(bot_token=config.TELEGRAM_BOT_API_KEY)
+
+    archive.run_until_disconnected()

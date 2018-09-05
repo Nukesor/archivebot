@@ -35,14 +35,24 @@ Finally execute following commands to install all dependencies, initialize the d
     % ./initdb.py
     % ./main.py
 
+
+## Configuration
+
+You can choose to run archivebot as a bot with a telegram bot token. If run as a normal telegram bot, archivebot is unable to scan the whole chat history. Thereby `/scan_chat` doesn't work.
+
+In case you decide to run it as a normal client to access all features, set the bot token to `None` and add your phone number to the configuration.
+You will receive a login code, which has to be entered on the first start and every time your session expires (which happens pretty much never).
+
+
 ## Commands:
 In group channels the bot expects a command in combination with its username.
 E.g. /start@bot_user_name
 
     /start Start the bot
     /stop Stop the bot
-    /clear - Clear all files from the server.
+    /clear Clear all files from the server.
     /set_name Set the name for this chat. This also determines the name of the target folder on the server.
+    /scan_chat Scan the whole chat history for files to back up.
     /accept ['document', 'photo'] Specify the accepted media Example: '/accept document photo'
     /verbose ['true', 'false'] The bot will complain if there are duplicate files or uncompressed images are sent, whilst not being accepted.
     /sort_by_user ['true', 'false'] Incoming files will be sorted by user in the server directory for this chat.
@@ -58,6 +68,7 @@ These are the command descriptions formatted for the botfather, in case you want
     stop - Stop archiving Files for this chat
     clear - Clear all files from the server.
     set_name - Set the name for this chat. This also determines the name of the target folder on the server.
+    scan_chat - Scan the whole chat history for files to back up.
     accept - ['document', 'photo'] Specify the allowed media types. Example: `/accept document photo`
     sort_by_user - ['true', 'false'] Incoming files will be sorted by user in the server directory for this chat.
     verbose - ['true', 'false'] The bot will complain if there are duplicate files or uncompressed images are sent, whilst not being accepted.
