@@ -33,7 +33,8 @@ if not os.path.exists(config.TARGET_DIR):
 
 
 @archive.on(events.NewMessage(pattern='/help'))
-async def help(event):
+@session_wrapper()
+async def help(event, session):
     """Send a help text."""
     return help_text
 
