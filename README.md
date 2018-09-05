@@ -41,10 +41,12 @@ E.g. /start@bot_user_name
 
     /start Start the bot
     /stop Stop the bot
+    /clear - Clear all files from the server.
     /set_name Set the name for this chat. This also determines the name of the target folder on the server.
+    /accept ['document', 'photo'] Specify the accepted media Example: '/accept document photo'
     /verbose ['true', 'false'] The bot will complain if there are duplicate files or uncompressed images are sent, whilst not being accepted.
     /sort_by_user ['true', 'false'] Incoming files will be sorted by user in the server directory for this chat.
-    /accept ['document', 'photo'] Specify the accepted media Example: '/accept document photo'
+    /allow_duplicates ['true', 'false'] Allow to save files with duplicate names.
     /info Show current settings.
     /help Show this text
 
@@ -54,9 +56,11 @@ These are the command descriptions formatted for the botfather, in case you want
 
     start - Start archiving Files for this chat
     stop - Stop archiving Files for this chat
+    clear - Clear all files from the server.
     set_name - Set the name for this chat. This also determines the name of the target folder on the server.
-    sort_by_user - ['true', 'false'] Incoming files will be sorted by user in the server directory for this chat.
     accept - ['document', 'photo'] Specify the allowed media types. Example: `/accept document photo`
+    sort_by_user - ['true', 'false'] Incoming files will be sorted by user in the server directory for this chat.
     verbose - ['true', 'false'] The bot will complain if there are duplicate files or uncompressed images are sent, whilst not being accepted.
+    allow_duplicates - ['true', 'false'] Allow to save files with duplicate names.
     info - Show current settings.
     help - Show the help text.

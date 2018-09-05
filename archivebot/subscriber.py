@@ -13,9 +13,10 @@ class Subscriber(base):
     chat_type = Column(String, primary_key=True)
     channel_name = Column(String(), nullable=False)
     accepted_media = Column(String(), nullable=False, default='')
+    allow_duplicates = Column(Boolean(), nullable=False, default=True)
     active = Column(Boolean(), nullable=False, default=False)
     verbose = Column(Boolean(), nullable=False, default=False)
-    sort_by_user = Column(Boolean(), nullable=False, default=False)
+    sort_by_user = Column(Boolean(), nullable=False, default=True)
 
     def __init__(self, chat_id, chat_type, channel_name, accepted_media='document'):
         """Create a new subscriber."""

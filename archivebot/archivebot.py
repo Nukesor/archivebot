@@ -1,24 +1,23 @@
 """A bot which downloads various files from chats."""
 import os
 from telethon import TelegramClient, events
+import shutil
 
 from archivebot.config import config
 from archivebot.subscriber import Subscriber
 from archivebot.file import File
 from archivebot.helper import (
-    get_bool_from_text,
     get_chat_information,
     get_info_text,
-    get_username,
+    get_option_for_subscriber,
     help_text,
     possible_media,
     session_wrapper,
     should_accept_message,
 )
 from archivebot.file_helper import (
-    check_if_file_exists,
+    create_file,
     get_channel_path,
-    get_file_path,
 )
 
 NAME = config.TELEGRAM_BOT_API_KEY.split(':')[0]
@@ -32,7 +31,7 @@ if not os.path.exists(config.TARGET_DIR):
 @archive.on(events.NewMessage(pattern='/help'))
 async def help(event):
     """Send a help text."""
-    await event.respond(help_text)
+    return help_text
 
 
 @archive.on(events.NewMessage(pattern='/info'))
@@ -41,7 +40,7 @@ async def info(event, session):
     """Send a help text."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
     subscriber = Subscriber.get_or_create(session, chat_id, chat_type, chat_id)
-    await event.respond(get_info_text(subscriber))
+    return get_info_text(subscriber)
 
 
 @archive.on(events.NewMessage(pattern='/set_name'))
@@ -59,65 +58,53 @@ async def set_name(event, session):
     target_real_path = os.path.realpath(config.TARGET_DIR)
     if not new_real_path.startswith(target_real_path) or \
             new_real_path == target_real_path:
-        text = "Please stop fooling around and trying to escape the directory."
-        await event.respond(text)
+        return "Please stop fooling around and trying to escape the directory."
 
         return
 
     if os.path.exists(new_channel_path):
-        text = "Channel name already exists. Please choose another one."
-        await event.respond(text)
+        return "Channel name already exists. Please choose another one."
 
     elif old_channel_path != new_channel_path:
         subscriber.channel_name = channel_name
         if os.path.exists(old_channel_path):
             os.rename(old_channel_path, new_channel_path)
-        text = "Channel name changed."
-        await event.respond(text)
-
-    session.commit()
+        return "Channel name changed."
 
 
 @archive.on(events.NewMessage(pattern='/verbose'))
 @session_wrapper()
 async def set_verbose(event, session):
     """Set query attributes."""
-    chat_id, chat_type = get_chat_information(event.message.to_id)
-    subscriber = Subscriber.get_or_create(session, chat_id, chat_type, chat_id)
-
-    # Convert the incoming text into an boolean
-    try:
-        value = get_bool_from_text(event.message.message.split(' ', maxsplit=1)[1])
-    except Exception:
-        text = "Got an invalid value. Please use one of [true, false, on, off, 0, 1]"
-        return await event.respond(text)
+    subscriber, value = await get_option_for_subscriber(event, session)
+    if subscriber is None:
+        return
 
     subscriber.verbose = value
-    text = f"I'm now configured to be {'verbose' if value else 'sneaky'}."
-    await event.respond(text)
+    return f"I'm now configured to be {'verbose' if value else 'sneaky'}."
 
-    session.commit()
+
+@archive.on(events.NewMessage(pattern='/allow_duplicates'))
+@session_wrapper()
+async def allow_duplicates(event, session):
+    """Set query attributes."""
+    subscriber, value = await get_option_for_subscriber(event, session)
+    if subscriber is None:
+        return
+
+    subscriber.allow_duplicates = value
+    return f"I'm now configured to {'' if value else 'not'} allow duplicate file names."
 
 
 @archive.on(events.NewMessage(pattern='/sort_by_user'))
 @session_wrapper()
 async def set_sort_by_user(event, session):
     """Set query attributes."""
-    chat_id, chat_type = get_chat_information(event.message.to_id)
-    subscriber = Subscriber.get_or_create(session, chat_id, chat_type, chat_id)
-
-    # Convert the incoming text into an boolean
-    try:
-        value = get_bool_from_text(event.message.message.split(' ', maxsplit=1)[1])
-    except Exception:
-        text = "Got an invalid value. Please use one of [true, false, on, off, 0, 1]"
-        return await event.respond(text)
-
+    subscriber, value = await get_option_for_subscriber(event, session)
+    if subscriber is None:
+        return
     subscriber.sort_by_user = value
-    text = f"{'Sorting' if value else 'Not sorting'} by user."
-    await event.respond(text)
-
-    session.commit()
+    return f"{'Sorting' if value else 'Not sorting'} by user."
 
 
 @archive.on(events.NewMessage(pattern='/accept'))
@@ -138,10 +125,7 @@ async def accepted_media_types(event, session):
     accepted_media.sort()
 
     subscriber.accepted_media = ' '.join(accepted_media)
-    text = f"Now accepting following media types: {accepted_media}."
-    await event.respond(text)
-
-    session.commit()
+    return f"Now accepting following media types: {accepted_media}."
 
 
 @archive.on(events.NewMessage(pattern='/start'))
@@ -153,10 +137,8 @@ async def start(event, session):
     subscriber = Subscriber.get_or_create(session, chat_id, chat_type, chat_id)
     subscriber.active = True
     session.add(subscriber)
-    session.commit()
 
-    text = 'Files posted in this channel will now be archived.'
-    await event.respond(text)
+    return 'Files posted in this channel will now be archived.'
 
 
 @archive.on(events.NewMessage(pattern='/stop'))
@@ -168,10 +150,27 @@ async def stop(event, session):
     subscriber = Subscriber.get_or_create(session, chat_id, chat_type, chat_id)
     subscriber.active = False
     session.add(subscriber)
-    session.commit()
 
-    text = "Files won't be archived any longer."
-    await event.respond(text)
+    return "Files won't be archived any longer."
+
+
+@archive.on(events.NewMessage(pattern='/clear_history'))
+@session_wrapper()
+async def clear_history(event, session):
+    """Stop the bot."""
+    chat_id, chat_type = get_chat_information(event.message.to_id)
+    subscriber = Subscriber.get_or_create(session, chat_id, chat_type, chat_id)
+
+    channel_path = get_channel_path(subscriber.channel_name)
+    if os.path.exists(channel_path):
+        shutil.rmtree(channel_path)
+
+    session.query(File) \
+        .filter(File.chat_id == chat_id) \
+        .filter(File.chat_type == chat_type) \
+        .delete()
+
+    return "All files from this chat have been deleted."
 
 
 @archive.on(events.NewMessage())
@@ -179,6 +178,12 @@ async def stop(event, session):
 async def process(event, session):
     """Check if we received any files."""
     message = event.message
+
+    await process_message(message, session, event)
+
+
+async def process_message(message, session, event):
+    """Process a single message."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
     subscriber = Subscriber.get_or_create(session, chat_id, chat_type, chat_id)
 
@@ -192,60 +197,20 @@ async def process(event, session):
     if not should_accept_message(subscriber, message, user):
         return
 
-    # Get file type and id
-    file_type, file_id = await get_file_information(event, message, subscriber, user)
-    if not file_type:
-        return
-
-    # Get and create paths for this file
-    file_path, file_name = get_file_path(subscriber, get_username(user), message)
-
-    # Check if this file already exists in the file system
-    if await check_if_file_exists(event, file_path, file_name, subscriber, user):
-        return
-
-    # Create new file
-    new_file = File(file_id, chat_id, message.id,
-                    user.id, file_name, file_type)
-    session.add(new_file)
-    session.commit()
+    # Create a new file. If it's not possible or not wanted, return None
+    new_file = await create_file(session, event, subscriber,
+                                 message, user, chat_id, chat_type)
+    if new_file is None:
+        return None
 
     # Download the file
-    if file_path:
-        success = await message.download_media(file_path)
-    else:
-        success = await message.download_media()
+    success = await message.download_media(str(new_file.file_path))
 
     # Download succeeded, if the result is not None
     if success is not None:
         # Mark the file as succeeded
         new_file.success = True
     session.commit()
-
-
-async def get_file_information(event, message, subscriber, user):
-    """Check whether we got an allowed file type."""
-    file_id = None
-    file_type = None
-
-    accepted_media = subscriber.accepted_media.split(' ')
-
-    if 'photo' in accepted_media \
-            and message.photo is not None:
-        file_type = 'photo'
-        file_id = message.photo.id
-    elif message.photo is not None:
-        # Flame the user that compressed photos are evil
-        if subscriber.verbose:
-            text = f"Please send uncompressed files @{user.username} :(."
-            await event.respond(text)
-
-    if 'document' in accepted_media \
-            and message.document is not None:
-        file_type = 'document'
-        file_id = message.document.id
-
-    return file_type, file_id
 
 
 archive.start(bot_token=config.TELEGRAM_BOT_API_KEY)

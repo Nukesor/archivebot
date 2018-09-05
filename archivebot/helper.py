@@ -5,6 +5,7 @@ from telethon import types
 
 from archivebot.db import get_session
 from archivebot.sentry import sentry
+from archivebot.subscriber import Subscriber
 
 
 possible_media = ['document', 'photo']
@@ -28,10 +29,12 @@ Available commands:
 
 /start Start the bot
 /stop Stop the bot
+/clear - Clear all files from the server.
 /set_name Set the name for this chat. This also determines the name of the target folder on the server.
 /verbose ['true', 'false'] The bot will complain if there are duplicate files or uncompressed images are sent, whilst not being accepted.
 /sort_by_user [true, false] Incoming files will be sorted by user in the server directory for this chat.
 /accept {possible_media} Specify the allowed media types. Always provide a space separated list of all accepted media types, e.g. 'document photo'.
+/allow_duplicates ['true', 'false'] Allow to save files with duplicate names.
 /info Show current settings.
 /help Show this text
 """
@@ -45,6 +48,7 @@ Name: {subscriber.channel_name}
 Active: {subscriber.active}
 Accepted Media: {subscriber.accepted_media}
 Verbose: {subscriber.verbose}
+Allow duplicates: {subscriber.allow_duplicates}
 Sort files by User: {subscriber.sort_by_user}
 """
 
@@ -70,7 +74,10 @@ def session_wrapper(addressed=True):
 
             session = get_session()
             try:
-                await func(event, session)
+                response = await func(event, session)
+                session.commit()
+                if response:
+                    await event.respond(response)
             except BaseException:
                 await asyncio.wait([event.respond("Some unknown error occurred.")])
                 traceback.print_exc()
@@ -80,6 +87,23 @@ def session_wrapper(addressed=True):
         return wrapper
 
     return real_session_wrapper
+
+
+async def get_option_for_subscriber(event, session):
+    """Return the resolved option value and the subscriber for a command."""
+    chat_id, chat_type = get_chat_information(event.message.to_id)
+    subscriber = Subscriber.get_or_create(session, chat_id, chat_type, chat_id)
+
+    # Convert the incoming text into an boolean
+    try:
+        value = get_bool_from_text(event.message.message.split(' ', maxsplit=1)[1])
+    except Exception:
+        text = "Got an invalid value. Please use one of [true, false, on, off, 0, 1]"
+        await event.respond(text)
+
+        return None, None
+
+    return subscriber, value
 
 
 def get_username(user):
