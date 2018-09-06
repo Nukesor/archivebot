@@ -55,14 +55,14 @@ async def info(event, session):
 async def set_name(event, session):
     """Set query attributes."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
-    channel_name = event.message.message.split(' ', maxsplit=1)[1].strip()
-    if channel_name == 'zips':
+    new_channel_name = event.message.message.split(' ', maxsplit=1)[1].strip()
+    if new_channel_name == 'zips':
         return "Invalid channel name. Pick another."
 
-    subscriber = Subscriber.get_or_create(session, chat_id, chat_type, channel_name)
+    subscriber = Subscriber.get_or_create(session, chat_id, chat_type, new_channel_name)
 
     old_channel_path = get_channel_path(subscriber.channel_name)
-    new_channel_path = get_channel_path(channel_name)
+    new_channel_path = get_channel_path(new_channel_name)
 
     new_real_path = os.path.realpath(new_channel_path)
     target_real_path = os.path.realpath(config.TARGET_DIR)
@@ -70,13 +70,13 @@ async def set_name(event, session):
             new_real_path == target_real_path:
         return "Please stop fooling around and trying to escape the directory."
 
-        return
-
-    if os.path.exists(new_channel_path):
+    if session.query(Subscriber) \
+            .filter(Subscriber.channel_name == new_channel_name) \
+            .one():
         return "Channel name already exists. Please choose another one."
 
     elif old_channel_path != new_channel_path:
-        subscriber.channel_name = channel_name
+        subscriber.channel_name = new_channel_name
         if os.path.exists(old_channel_path):
             os.rename(old_channel_path, new_channel_path)
         return "Channel name changed."

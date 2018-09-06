@@ -56,9 +56,13 @@ def get_channel_path(channel_name):
     return os.path.join(config.TARGET_DIR, channel_name)
 
 
-def init_zip_dir():
+def init_zip_dir(channel_name):
     """Compile the directory path for this channel."""
     zip_dir = os.path.join(config.TARGET_DIR, 'zips')
+    if not os.path.exists(zip_dir):
+        os.mkdir(zip_dir)
+
+    zip_dir = os.path.join(zip_dir, channel_name)
     if not os.path.exists(zip_dir):
         os.mkdir(zip_dir)
 
