@@ -42,6 +42,9 @@ Finally execute following commands to install all dependencies, initialize the d
     % ./main.py
 
 
+Additionally, if you want to use the zip feature, you need to install 7zip on your system.
+
+
 ## Configuration
 
 You can choose to run archivebot as a bot with a telegram bot token. If run as a normal telegram bot, archivebot is unable to scan the whole chat history. Thereby `/scan_chat` doesn't work.
