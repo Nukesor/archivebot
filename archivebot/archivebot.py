@@ -72,7 +72,7 @@ async def set_name(event, session):
 
     if session.query(Subscriber) \
             .filter(Subscriber.channel_name == new_channel_name) \
-            .one():
+            .one_or_none():
         return "Channel name already exists. Please choose another one."
 
     elif old_channel_path != new_channel_path:
