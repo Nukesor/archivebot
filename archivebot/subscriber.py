@@ -26,11 +26,11 @@ class Subscriber(base):
         self.accepted_media = accepted_media
 
     @staticmethod
-    def get_or_create(session, chat_id, chat_type, channel_name):
+    def get_or_create(session, chat_id, chat_type, channel_name=None):
         """Get or create a new subscriber."""
         subscriber = session.query(Subscriber).get((chat_id, chat_type))
         if not subscriber:
-            subscriber = Subscriber(chat_id, chat_type, channel_name)
+            subscriber = Subscriber(chat_id, chat_type, channel_name=channel_name)
             session.add(subscriber)
             session.commit()
 
