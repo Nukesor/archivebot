@@ -46,7 +46,7 @@ async def help(event, session):
 async def info(event, session):
     """Send a help text."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
-    subscriber = Subscriber.get_or_create(session, chat_id, chat_type, chat_id)
+    subscriber = Subscriber.get_or_create(session, chat_id, chat_type)
     return get_info_text(subscriber)
 
 
@@ -59,7 +59,8 @@ async def set_name(event, session):
     if new_channel_name == 'zips':
         return "Invalid channel name. Pick another."
 
-    subscriber = Subscriber.get_or_create(session, chat_id, chat_type, new_channel_name)
+    subscriber = Subscriber.get_or_create(session, chat_id, chat_type,
+                                          channel_name=new_channel_name)
 
     old_channel_path = get_channel_path(subscriber.channel_name)
     new_channel_path = get_channel_path(new_channel_name)
@@ -122,7 +123,7 @@ async def set_sort_by_user(event, session):
 async def accepted_media_types(event, session):
     """Set query attributes."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
-    subscriber = Subscriber.get_or_create(session, chat_id, chat_type, chat_id)
+    subscriber = Subscriber.get_or_create(session, chat_id, chat_type)
 
     # Convert the incoming text into an boolean
     arguments = event.message.message.lower().split(' ')[1:]
@@ -144,7 +145,7 @@ async def start(event, session):
     """Start the bot."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
 
-    subscriber = Subscriber.get_or_create(session, chat_id, chat_type, chat_id)
+    subscriber = Subscriber.get_or_create(session, chat_id, chat_type)
     subscriber.active = True
     session.add(subscriber)
 
@@ -157,7 +158,7 @@ async def stop(event, session):
     """Stop the bot."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
 
-    subscriber = Subscriber.get_or_create(session, chat_id, chat_type, chat_id)
+    subscriber = Subscriber.get_or_create(session, chat_id, chat_type)
     subscriber.active = False
     session.add(subscriber)
 
@@ -169,7 +170,7 @@ async def stop(event, session):
 async def clear_history(event, session):
     """Stop the bot."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
-    subscriber = Subscriber.get_or_create(session, chat_id, chat_type, chat_id)
+    subscriber = Subscriber.get_or_create(session, chat_id, chat_type)
 
     channel_path = get_channel_path(subscriber.channel_name)
     if os.path.exists(channel_path):
@@ -188,7 +189,7 @@ async def clear_history(event, session):
 async def scan_chat(event, session):
     """Check if we received any files."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
-    subscriber = Subscriber.get_or_create(session, chat_id, chat_type, chat_id)
+    subscriber = Subscriber.get_or_create(session, chat_id, chat_type)
 
     async for message in archive.iter_messages(event.message.to_id):
         await process_message(session, subscriber, message, event)
@@ -201,13 +202,13 @@ async def scan_chat(event, session):
 async def zip(event, session):
     """Check if we received any files."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
-    subscriber = Subscriber.get_or_create(session, chat_id, chat_type, chat_id)
+    subscriber = Subscriber.get_or_create(session, chat_id, chat_type)
 
     channel_path = get_channel_path(subscriber.channel_name)
     if not os.path.exists(channel_path):
         return "No files for this channel yet."
 
-    zip_dir = init_zip_dir()
+    zip_dir = init_zip_dir(subscriber.channel_name)
 
     create_zips(subscriber.channel_name, zip_dir, channel_path)
 
@@ -225,7 +226,7 @@ async def zip(event, session):
 async def process(event, session):
     """Check if we received any files."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
-    subscriber = Subscriber.get_or_create(session, chat_id, chat_type, chat_id)
+    subscriber = Subscriber.get_or_create(session, chat_id, chat_type)
 
     await process_message(session, subscriber, event.message, event)
 

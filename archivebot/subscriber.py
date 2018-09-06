@@ -18,11 +18,11 @@ class Subscriber(base):
     verbose = Column(Boolean(), nullable=False, default=False)
     sort_by_user = Column(Boolean(), nullable=False, default=True)
 
-    def __init__(self, chat_id, chat_type, channel_name, accepted_media='document'):
+    def __init__(self, chat_id, chat_type, channel_name=None, accepted_media='document'):
         """Create a new subscriber."""
         self.chat_id = chat_id
         self.chat_type = chat_type
-        self.channel_name = channel_name
+        self.channel_name = channel_name or chat_id
         self.accepted_media = accepted_media
 
     @staticmethod

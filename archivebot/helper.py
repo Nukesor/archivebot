@@ -94,7 +94,7 @@ def session_wrapper(addressed=True):
 async def get_option_for_subscriber(event, session):
     """Return the resolved option value and the subscriber for a command."""
     chat_id, chat_type = get_chat_information(event.message.to_id)
-    subscriber = Subscriber.get_or_create(session, chat_id, chat_type, chat_id)
+    subscriber = Subscriber.get_or_create(session, chat_id, chat_type)
 
     # Convert the incoming text into an boolean
     try:
