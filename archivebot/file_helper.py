@@ -4,23 +4,27 @@ import subprocess
 from telethon import types
 from datetime import datetime
 
+from archivebot.file import File
 from archivebot.config import config
 from archivebot.sentry import sentry
-from archivebot.helper import get_username
-from archivebot.file import File
+from archivebot.helper import (
+    get_username,
+    get_peer_information,
+)
 
 
-async def create_file(session, event, subscriber,
-                      message, user, chat_id, chat_type):
+async def create_file(session, event, subscriber, message, user):
     """Create a file object."""
+    to_id, to_type = get_peer_information(message.to_id)
+
     file_type, file_id = await get_file_information(event, message, subscriber, user)
     if not file_type:
-        return
+        return None
 
     # Check if this exact file from the same message is already downloaded.
     # This is a hard constraint which shouldn't be violated.
-    if File.exists(session, chat_id, file_id):
-        return
+    if File.exists(session, to_id, file_id):
+        return None
 
     # The file path is depending on the media type.
     # In case such a file already exists and duplicate files are disabled, the function returns None.
@@ -41,8 +45,8 @@ async def create_file(session, event, subscriber,
         return None
 
     # The file path is depending on the media type.
-    new_file = File(file_id, chat_id, chat_type,
-                    user.id, message.id,
+    new_file = File(file_id, to_id, user.id,
+                    subscriber, to_type, message.id,
                     file_type, file_name, file_path)
 
     session.add(new_file)
@@ -117,11 +121,11 @@ def get_file_path(subscriber, username, message):
 def find_file_name(directory, file_name):
     """Find a file name which doesn't exist yet."""
     counter = 1
-    original_filename, extension = os.path.splitext()
-    file_name = f"{file_name}_{counter}{extension}"
+    original_file_name, extension = os.path.splitext(file_name)
+    file_name = f"{original_file_name}_{counter}{extension}"
     while os.path.exists(os.path.join(directory, file_name)):
         counter += 1
-        file_name = f"{file_name}_{counter}{extension}"
+        file_name = f"{original_file_name}_{counter}{extension}"
 
     return file_name
 

@@ -65,7 +65,7 @@ def session_wrapper(addressed=True):
                 bot_user = await event.client.get_me()
                 username = bot_user.username
                 recipient_string = f'@{username}'
-                _, chat_type = get_chat_information(event.message.to_id)
+                _, chat_type = get_peer_information(event.message.to_id)
 
                 # Accept all commands coming directly from a user
                 # Only accept commands send with an recipient string
@@ -93,7 +93,7 @@ def session_wrapper(addressed=True):
 
 async def get_option_for_subscriber(event, session):
     """Return the resolved option value and the subscriber for a command."""
-    chat_id, chat_type = get_chat_information(event.message.to_id)
+    chat_id, chat_type = get_peer_information(event.message.to_id)
     subscriber = Subscriber.get_or_create(session, chat_id, chat_type)
 
     # Convert the incoming text into an boolean
@@ -118,7 +118,7 @@ def get_username(user):
         return user.last_name
 
 
-def get_chat_information(chat):
+def get_peer_information(chat):
     """Get the id depending on the chat type."""
     if isinstance(chat, types.PeerUser):
         return chat.user_id, 'user'
@@ -151,7 +151,7 @@ async def should_accept_message(event, message, user, subscriber):
 
     # Don't check messages from ourselves
     me = await event.client.get_me()
-    if message.from_id == me.id:
+    if user.id == me.id:
         return False
 
     # We only want messages from users

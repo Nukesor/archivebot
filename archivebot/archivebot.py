@@ -4,16 +4,18 @@ from telethon import TelegramClient, events
 import shutil
 
 from archivebot.config import config
+from archivebot.file import File # noqa
 from archivebot.subscriber import Subscriber
-from archivebot.file import File
+from archivebot.sentry import sentry
 from archivebot.helper import (
-    get_chat_information,
+    get_peer_information,
     get_info_text,
     get_option_for_subscriber,
     help_text,
     possible_media,
     session_wrapper,
     should_accept_message,
+    get_username,
 )
 from archivebot.file_helper import (
     create_file,
@@ -45,8 +47,8 @@ async def help(event, session):
 @session_wrapper()
 async def info(event, session):
     """Send a help text."""
-    chat_id, chat_type = get_chat_information(event.message.to_id)
-    subscriber = Subscriber.get_or_create(session, chat_id, chat_type)
+    to_id, to_type = get_peer_information(event.message.to_id)
+    subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message)
     return get_info_text(subscriber)
 
 
@@ -54,12 +56,12 @@ async def info(event, session):
 @session_wrapper()
 async def set_name(event, session):
     """Set query attributes."""
-    chat_id, chat_type = get_chat_information(event.message.to_id)
+    to_id, to_type = get_peer_information(event.message.to_id)
     new_channel_name = event.message.message.split(' ', maxsplit=1)[1].strip()
     if new_channel_name == 'zips':
         return "Invalid channel name. Pick another."
 
-    subscriber = Subscriber.get_or_create(session, chat_id, chat_type,
+    subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message,
                                           channel_name=new_channel_name)
 
     old_channel_path = get_channel_path(subscriber.channel_name)
@@ -69,7 +71,14 @@ async def set_name(event, session):
     target_real_path = os.path.realpath(config.TARGET_DIR)
     if not new_real_path.startswith(target_real_path) or \
             new_real_path == target_real_path:
-        return "Please stop fooling around and trying to escape the directory."
+        user = await archive.get_entity(event.message.from_id)
+        sentry.captureMessage("User tried to escape directory.",
+                              extra={'new_channel_name': new_channel_name,
+                                     'channel': subscriber.channel_name,
+                                     'user': get_username(user)},
+                              tags={'level': 'info'})
+
+        return "Please stop fooling around and try to escape the directory. I have been notified as well."
 
     if session.query(Subscriber) \
             .filter(Subscriber.channel_name == new_channel_name) \
@@ -122,8 +131,8 @@ async def set_sort_by_user(event, session):
 @session_wrapper()
 async def accepted_media_types(event, session):
     """Set query attributes."""
-    chat_id, chat_type = get_chat_information(event.message.to_id)
-    subscriber = Subscriber.get_or_create(session, chat_id, chat_type)
+    to_id, to_type = get_peer_information(event.message.to_id)
+    subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message)
 
     # Convert the incoming text into an boolean
     arguments = event.message.message.lower().split(' ')[1:]
@@ -143,9 +152,9 @@ async def accepted_media_types(event, session):
 @session_wrapper()
 async def start(event, session):
     """Start the bot."""
-    chat_id, chat_type = get_chat_information(event.message.to_id)
+    to_id, to_type = get_peer_information(event.message.to_id)
 
-    subscriber = Subscriber.get_or_create(session, chat_id, chat_type)
+    subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message)
     subscriber.active = True
     session.add(subscriber)
 
@@ -156,9 +165,9 @@ async def start(event, session):
 @session_wrapper()
 async def stop(event, session):
     """Stop the bot."""
-    chat_id, chat_type = get_chat_information(event.message.to_id)
+    to_id, to_type = get_peer_information(event.message.to_id)
 
-    subscriber = Subscriber.get_or_create(session, chat_id, chat_type)
+    subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message)
     subscriber.active = False
     session.add(subscriber)
 
@@ -169,17 +178,17 @@ async def stop(event, session):
 @session_wrapper()
 async def clear_history(event, session):
     """Stop the bot."""
-    chat_id, chat_type = get_chat_information(event.message.to_id)
-    subscriber = Subscriber.get_or_create(session, chat_id, chat_type)
+    to_id, to_type = get_peer_information(event.message.to_id)
+    subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message)
 
     channel_path = get_channel_path(subscriber.channel_name)
+    for known_file in subscriber.files:
+        session.delete(known_file)
+
     if os.path.exists(channel_path):
         shutil.rmtree(channel_path)
 
-    session.query(File) \
-        .filter(File.chat_id == chat_id) \
-        .filter(File.chat_type == chat_type) \
-        .delete()
+    session.commit()
 
     return "All files from this chat have been deleted."
 
@@ -188,27 +197,30 @@ async def clear_history(event, session):
 @session_wrapper(addressed=False)
 async def scan_chat(event, session):
     """Check if we received any files."""
-    chat_id, chat_type = get_chat_information(event.message.to_id)
-    subscriber = Subscriber.get_or_create(session, chat_id, chat_type)
+    to_id, to_type = get_peer_information(event.message.to_id)
+    subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message)
 
     async for message in archive.iter_messages(event.message.to_id):
         await process_message(session, subscriber, message, event)
 
-    return "Chat scan successful ."
+    return "Chat scan successful."
 
 
 @archive.on(events.NewMessage(pattern='/zip'))
 @session_wrapper()
 async def zip(event, session):
     """Check if we received any files."""
-    chat_id, chat_type = get_chat_information(event.message.to_id)
-    subscriber = Subscriber.get_or_create(session, chat_id, chat_type)
+    to_id, to_type = get_peer_information(event.message.to_id)
+    subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message)
 
     channel_path = get_channel_path(subscriber.channel_name)
     if not os.path.exists(channel_path):
         return "No files for this channel yet."
 
     zip_dir = init_zip_dir(subscriber.channel_name)
+
+    text = f"Zipping started, this might take some time. Please don't issue this command again, until I'm finished."
+    await event.respond(text)
 
     create_zips(subscriber.channel_name, zip_dir, channel_path)
 
@@ -225,15 +237,15 @@ async def zip(event, session):
 @session_wrapper(addressed=False)
 async def process(event, session):
     """Check if we received any files."""
-    chat_id, chat_type = get_chat_information(event.message.to_id)
-    subscriber = Subscriber.get_or_create(session, chat_id, chat_type)
+    to_id, to_type = get_peer_information(event.message.to_id)
+    subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message)
 
     await process_message(session, subscriber, event.message, event)
 
 
 async def process_message(session, subscriber, message, event):
     """Process a single message."""
-    chat_id, chat_type = get_chat_information(message.to_id)
+    to_id, to_type = get_peer_information(message.to_id)
 
     # If this message is forwarded, get the original sender.
     if message.forward:
@@ -246,8 +258,7 @@ async def process_message(session, subscriber, message, event):
         return
 
     # Create a new file. If it's not possible or not wanted, return None
-    new_file = await create_file(session, event, subscriber,
-                                 message, user, chat_id, chat_type)
+    new_file = await create_file(session, event, subscriber, message, user)
     if new_file is None:
         return None
 
