@@ -30,6 +30,14 @@ async def create_file(session, event, subscriber, message, user):
     # In case such a file already exists and duplicate files are disabled, the function returns None.
     # In that case we will return early.
     file_path, file_name = get_file_path(subscriber, get_username(user), message)
+
+    # Don't check zipped files from ourselves.
+    # Otherwise we would double in size on each /scan_chat /zip command combination
+    me = await event.client.get_me()
+    splitted = file_name.rsplit('.', maxsplit=2)
+    if user.id == me.id and len(splitted) == 3 and splitted[1] == '7z':
+        return None
+
     if file_path is None:
         # Inform the user about duplicate files
         if subscriber.verbose:

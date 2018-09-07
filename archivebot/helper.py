@@ -94,7 +94,7 @@ def session_wrapper(addressed=True):
 async def get_option_for_subscriber(event, session):
     """Return the resolved option value and the subscriber for a command."""
     chat_id, chat_type = get_peer_information(event.message.to_id)
-    subscriber = Subscriber.get_or_create(session, chat_id, chat_type)
+    subscriber = Subscriber.get_or_create(session, chat_id, chat_type, event.message)
 
     # Convert the incoming text into an boolean
     try:
@@ -147,11 +147,6 @@ async def should_accept_message(event, message, user, subscriber):
 
     # No media => not interesting
     if message.media is None:
-        return False
-
-    # Don't check messages from ourselves
-    me = await event.client.get_me()
-    if user.id == me.id:
         return False
 
     # We only want messages from users
