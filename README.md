@@ -21,8 +21,8 @@ To send multiple uncompressed pictures and videos with your phone:
 - Zip all files and post it into the chat with the simple `/zip` command.
 - Clear all files from the server with a simple `/clear_history` command.
 - Scan the whole chat with `scan_chat` (Bot needs to be logged in as a normal user for this feature).
-- Configure your accept specified media types.
-- Set a custom name for each chat for easier server file management and naming of the zip file.
+- Specify your accepted media types.
+- Set a custom name for a chat for easier server file management and naming of the zip file.
 - Automatic sorting of files by chat and user. `sort_by_user` can be disabled.
 - Properly handles forwarded messages (If `sort_by_user` is enabled, the original sender will be used).
 - Verbose option for notifying users of duplicates or compressed images.
@@ -56,7 +56,7 @@ You will receive a login code, which has to be entered on the first start and ev
 
 ## Commands:
 In group channels the bot expects a command in combination with its username.
-E.g. /start@bot_user_name
+E.g. `/start@bot_user_name`
 
     /start Start the bot
     /stop Stop the bot
