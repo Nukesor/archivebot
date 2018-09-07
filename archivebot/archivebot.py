@@ -224,7 +224,8 @@ async def zip(event, session):
 
     create_zips(subscriber.channel_name, zip_dir, channel_path)
 
-    "Zipping is completed. I'll now start uploading."
+    text = "Zipping is completed. I'll now start uploading."
+    await event.respond(text)
 
     for zip_file in os.listdir(zip_dir):
         zip_file_path = os.path.join(zip_dir, zip_file)
