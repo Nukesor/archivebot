@@ -50,9 +50,9 @@ class File(base):
 
         self.subscriber = subscriber
 
-    def exists(session, to_id, file_id):
+    def exists(session, subscriber, file_id):
         """Check if we already have this file."""
         return session.query(File) \
-            .filter(File.to_id == to_id) \
             .filter(File.file_id == file_id) \
+            .filter(File.subscriber == subscriber) \
             .all()

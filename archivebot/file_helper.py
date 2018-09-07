@@ -23,7 +23,7 @@ async def create_file(session, event, subscriber, message, user):
 
     # Check if this exact file from the same message is already downloaded.
     # This is a hard constraint which shouldn't be violated.
-    if File.exists(session, to_id, file_id):
+    if File.exists(session, subscriber, file_id):
         return None
 
     # The file path is depending on the media type.
