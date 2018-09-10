@@ -258,7 +258,7 @@ async def process_message(session, subscriber, message, event):
             user = await archive.get_entity(message.from_id)
     except ValueError:
         sentry.captureMessage(
-            "User tried to escape directory.",
+            "Failed to resolve user entity.",
             extra={'channel': subscriber.channel_name,
                    'from': message.from_id,
                    'forward': message.forward,
