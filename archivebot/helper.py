@@ -1,5 +1,4 @@
 """Some static stuff or helper functions for archive bot."""
-import asyncio
 import traceback
 from telethon import types
 
@@ -81,7 +80,8 @@ def session_wrapper(addressed=True):
                 if response:
                     await event.respond(response)
             except BaseException:
-                await asyncio.wait([event.respond("Some unknown error occurred.")])
+                if addressed:
+                    await event.respond("Some unknown error occurred.")
                 traceback.print_exc()
                 sentry.captureException()
             finally:

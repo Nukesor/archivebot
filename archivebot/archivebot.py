@@ -260,7 +260,6 @@ async def process_message(session, subscriber, message, event):
         sentry.captureMessage(
             "User tried to escape directory.",
             extra={'channel': subscriber.channel_name,
-                   'user': get_username(user),
                    'from': message.from_id,
                    'forward': message.forward,
                    },
