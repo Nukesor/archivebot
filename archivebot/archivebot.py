@@ -16,6 +16,7 @@ from archivebot.helper import (
     session_wrapper,
     should_accept_message,
     get_username,
+    UnknownUser,
 )
 from archivebot.file_helper import (
     create_file,
@@ -253,8 +254,10 @@ async def process_message(session, subscriber, message, event):
     try:
         # If this message is forwarded, get the original sender.
         if message.forward:
+            user_id = message.forward.sender_id
             user = await message.forward.get_sender()
         else:
+            user_id = message.from_id
             user = await archive.get_entity(message.from_id)
     except ValueError:
         sentry.captureException()
@@ -265,7 +268,11 @@ async def process_message(session, subscriber, message, event):
                    'forward': message.forward,
                    },
             tags={'level': 'info'})
-        return
+
+        # Handle channels. Channels always have None for user_id:
+        if user_id is None:
+            user_id = subscriber.channel_name
+        user = UnknownUser(user_id)
 
     # Check if we should accept this message
     if not await should_accept_message(event, message, user, subscriber):

@@ -150,7 +150,15 @@ async def should_accept_message(event, message, user, subscriber):
         return False
 
     # We only want messages from users
-    if not isinstance(user, types.User):
+    if not isinstance(user, [types.User, UnknownUser]):
         return False
 
     return True
+
+
+class UnknownUser:
+    """A helper class for messages from users which don't have a profile."""
+
+    def __init(self, id):
+        self.id = id
+        self.username = id
