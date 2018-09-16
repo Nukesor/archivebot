@@ -150,7 +150,7 @@ async def should_accept_message(event, message, user, subscriber):
         return False
 
     # We only want messages from users
-    if not isinstance(user, [types.User, UnknownUser]):
+    if not isinstance(user, (types.User, UnknownUser)):
         return False
 
     return True
