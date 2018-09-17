@@ -3,7 +3,7 @@
 A handy bot which enables to download files from telegram chats to your server.
 
 It features a full backup of all files posted in a chat and a continuous backup of incoming new media.
-A zip archive can then be created and uploaded into the Telegram chat with a single command at any time.
+A zip archive can then be created and downloaded from the Telegram chat with a single command at any time.
 
 <p align="center">
     <img src="https://raw.githubusercontent.com/Nukesor/images/master/archivebot_example.png">
