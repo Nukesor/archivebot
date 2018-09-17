@@ -159,6 +159,7 @@ async def should_accept_message(event, message, user, subscriber):
 class UnknownUser:
     """A helper class for messages from users which don't have a profile."""
 
-    def __init(self, id):
-        self.id = id
-        self.username = id
+    def __init__(self, user_id):
+        """Create new UnknownUser."""
+        self.id = user_id
+        self.username = user_id

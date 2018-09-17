@@ -266,6 +266,7 @@ async def process_message(session, subscriber, message, event):
             extra={'channel': subscriber.channel_name,
                    'from': message.from_id,
                    'forward': message.forward,
+                   'message': message,
                    },
             tags={'level': 'info'})
 
