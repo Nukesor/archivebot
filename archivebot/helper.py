@@ -68,10 +68,9 @@ def session_wrapper(addressed=True):
 
                 # Accept all commands coming directly from a user
                 # Only accept commands send with an recipient string
-                if chat_type != 'user':
-                    command = event.message.message.split(' ', maxsplit=1)[0]
-                    if recipient_string not in command:
-                        return
+                command = event.message.message.split(' ', maxsplit=1)[0]
+                if recipient_string not in command:
+                    return
 
             session = get_session()
             try:
