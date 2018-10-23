@@ -4,12 +4,11 @@ A handy bot which enables to download files from telegram chats to your server.
 
 It features a full backup of all files posted in a chat and a continuous backup of incoming new media.
 A zip archive can then be created and downloaded from the Telegram chat with a single command at any time.
+For instance, this is great to collect images and videos from the members of your last holiday trip or to simply push backups or interesting files from your telegram chats to your server.
 
 <p align="center">
     <img src="https://raw.githubusercontent.com/Nukesor/images/master/archivebot_example.png">
 </p>
-
-For instance, this is great to collect images and videos from the members of your last holiday trip or to simply push backups or interesting files from your telegram chats to your server.
 
 To send multiple uncompressed pictures and videos with your phone:
 1. Click the share button
@@ -50,7 +49,7 @@ Additionally, if you want to use the zip feature, you need to install 7zip on yo
 
 You can choose to run archivebot as a bot with a telegram bot token. If run as a normal telegram bot, archivebot is unable to scan the whole chat history. Thereby `/scan_chat` doesn't work.
 
-In case you decide to run it as a normal client to access all features, set the bot token to `None` and add your phone number to the configuration.
+In case you decide to run it as a userbot to access all features, set the bot token to `None` and add your phone number to the configuration.
 You will receive a login code, which has to be entered on the first start and every time your session expires (which happens pretty much never).
 
 
