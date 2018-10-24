@@ -260,16 +260,6 @@ async def process_message(session, subscriber, message, event):
             user_id = message.from_id
             user = await archive.get_entity(message.from_id)
     except ValueError:
-        sentry.captureException()
-        sentry.captureMessage(
-            "Failed to resolve user entity.",
-            extra={'channel': subscriber.channel_name,
-                   'from': message.from_id,
-                   'forward': message.forward,
-                   'message': message,
-                   },
-            tags={'level': 'info'})
-
         # Handle channels. Channels always have None for user_id:
         if user_id is None:
             user_id = subscriber.channel_name
