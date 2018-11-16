@@ -281,7 +281,7 @@ async def process_message(session, subscriber, message, event):
         return
 
     # Ignore users with absolutely no name
-    if user.last_name is None or user.first_name is None or uesr.username is None:
+    if user.last_name is None or user.first_name is None or user.username is None:
         return
 
     # Create a new file. If it's not possible or not wanted, return None
