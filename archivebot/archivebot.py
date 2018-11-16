@@ -1,6 +1,7 @@
 """A bot which downloads various files from chats."""
 import os
 from telethon import TelegramClient, events
+from telethon.errors import BadMessageError
 import shutil
 
 from archivebot.config import config
@@ -202,7 +203,11 @@ async def scan_chat(event, session):
     subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message)
 
     async for message in archive.iter_messages(event.message.to_id):
-        await process_message(session, subscriber, message, event)
+        try:
+            await process_message(session, subscriber, message, event)
+        except BadMessageError:
+            # Ignore bad message errors
+            return
 
     return "Chat scan successful."
 
@@ -244,8 +249,11 @@ async def process(event, session):
     to_id, to_type = get_peer_information(event.message.to_id)
     subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message)
 
-    await process_message(session, subscriber, event.message, event)
-
+    try:
+        await process_message(session, subscriber, event.message, event)
+    except BadMessageError:
+        # Ignore bad message errors
+        return
 
 async def process_message(session, subscriber, message, event):
     """Process a single message."""
@@ -257,6 +265,9 @@ async def process_message(session, subscriber, message, event):
             user_id = message.forward.sender_id
             user = await message.forward.get_sender()
         else:
+            # Ignore messages with no sent user
+            if message.from_id is None:
+                return
             user_id = message.from_id
             user = await archive.get_entity(message.from_id)
     except ValueError:
@@ -267,6 +278,10 @@ async def process_message(session, subscriber, message, event):
 
     # Check if we should accept this message
     if not await should_accept_message(event, message, user, subscriber):
+        return
+
+    # Ignore users with absolutely no name
+    if user.last_name is None or user.first_name is None or uesr.username is None:
         return
 
     # Create a new file. If it's not possible or not wanted, return None
