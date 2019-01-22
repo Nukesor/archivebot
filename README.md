@@ -48,7 +48,10 @@ Additionally, if you want to use the zip feature, you need to install 7zip on yo
 
 ## Configuration
 
-You can choose to run archivebot as a bot with a telegram bot token. If run as a normal telegram bot, archivebot is unable to scan the whole chat history. Thereby `/scan_chat` doesn't work. And the `/zip` command
+You can choose to run archivebot as a bot with a telegram bot token. If run as a normal telegram bot, archivebot is unable to scan the whole chat history. Thereby `/scan_chat` doesn't work as well as the `/zip` command, since normal bots can't upload files larger than 20MB. Userbots on the other hand can upload files up to 1.5GB.
+
+
+**If you run the bot as a normal Telegram bot, disable the privacy mode for your bot via the BotFather menu!** Telegram bots can't read group messages by default.
 
 In case you decide to run it as a userbot to access all features, set the bot token to `None` and add your phone number to the configuration.
 You will receive a login code, which has to be entered on the first start and every time your session expires (which happens pretty much never).
