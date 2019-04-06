@@ -19,7 +19,7 @@ To send multiple uncompressed pictures and videos with your phone:
 2. Select `File`
 3. Select Gallery (To send images without compression)
 
-In group channels the bot expects a command in combination with its username.
+In group chats the bot expects a command in combination with its username.
 E.g. /start@bot_user_name
 
 Feel free to contribute or look at the code at https://github.com/Nukesor/archivebot
@@ -45,7 +45,7 @@ def get_info_text(subscriber):
     """Format the info text."""
     return f"""Current settings:
 
-Name: {subscriber.channel_name}
+Name: {subscriber.chat_name}
 Active: {subscriber.active}
 Accepted Media: {subscriber.accepted_media}
 Verbose: {subscriber.verbose}
@@ -123,8 +123,8 @@ def get_peer_information(chat):
         return chat.user_id, 'user'
     elif isinstance(chat, types.PeerChat):
         return chat.chat_id, 'chat'
-    elif isinstance(chat, types.PeerChannel):
-        return chat.channel_id, 'channel'
+    elif isinstance(chat, types.Peerchat):
+        return chat.chat_id, 'chat'
     else:
         raise Exception("Unknown chat type")
 

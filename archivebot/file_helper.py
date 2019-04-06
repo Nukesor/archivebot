@@ -47,7 +47,7 @@ async def create_file(session, event, subscriber, message, user):
         sentry.captureMessage("File already exists",
                               extra={'file_path': file_path,
                                      'file_name': file_name,
-                                     'channel': subscriber.channel_name,
+                                     'chat': subscriber.chat_name,
                                      'user': get_username(user)},
                               tags={'level': 'info'})
         return None
@@ -63,38 +63,38 @@ async def create_file(session, event, subscriber, message, user):
     return new_file
 
 
-def get_channel_path(channel_name):
-    """Compile the directory path for this channel."""
-    return os.path.join(config.TARGET_DIR, channel_name)
+def get_chat_path(chat_name):
+    """Compile the directory path for this chat."""
+    return os.path.join(config.TARGET_DIR, chat_name)
 
 
-def init_zip_dir(channel_name):
-    """Compile the directory path for this channel."""
+def init_zip_dir(chat_name):
+    """Compile the directory path for this chat."""
     zip_dir = os.path.join(config.TARGET_DIR, 'zips')
     if not os.path.exists(zip_dir):
         os.mkdir(zip_dir)
 
-    zip_dir = os.path.join(zip_dir, channel_name)
+    zip_dir = os.path.join(zip_dir, chat_name)
     if not os.path.exists(zip_dir):
         os.mkdir(zip_dir)
 
     return zip_dir
 
 
-def get_zip_file_path(channel_name):
-    """Compile the directory path for this channel."""
-    return os.path.join(config.TARGET_DIR, 'zips', channel_name)
+def get_zip_file_path(chat_name):
+    """Compile the directory path for this chat."""
+    return os.path.join(config.TARGET_DIR, 'zips', chat_name)
 
 
 def get_file_path(subscriber, username, message):
     """Compile the file path and ensure the parent directories exist."""
-    # If we don't sort by user, use the channel_path
+    # If we don't sort by user, use the chat_path
     if not subscriber.sort_by_user:
-        directory = get_channel_path(subscriber.channel_name)
+        directory = get_chat_path(subscriber.chat_name)
     # sort_by_user is active. Add the user directory.
     else:
         directory = os.path.join(
-            get_channel_path(subscriber.channel_name),
+            get_chat_path(subscriber.chat_name),
             username.lower(),
         )
 
@@ -163,9 +163,9 @@ async def get_file_information(event, message, subscriber, user):
     return file_type, file_id
 
 
-def create_zips(channel_name, zip_dir, target_dir):
+def create_zips(chat_name, zip_dir, target_dir):
     """Create a zip file from given dir path."""
-    file_name = os.path.join(zip_dir, channel_name)
+    file_name = os.path.join(zip_dir, chat_name)
     command = ["7z", "-v1200m", "a", f"{file_name}.7z", target_dir]
 
     subprocess.run(command)

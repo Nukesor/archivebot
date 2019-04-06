@@ -22,7 +22,7 @@ from archivebot.helper import (
 from archivebot.file_helper import (
     create_file,
     create_zips,
-    get_channel_path,
+    get_chat_path,
     init_zip_dir,
 )
 
@@ -59,39 +59,39 @@ async def info(event, session):
 async def set_name(event, session):
     """Set query attributes."""
     to_id, to_type = get_peer_information(event.message.to_id)
-    new_channel_name = event.message.message.split(' ', maxsplit=1)[1].strip()
-    if new_channel_name == 'zips':
-        return "Invalid channel name. Pick another."
+    new_chat_name = event.message.message.split(' ', maxsplit=1)[1].strip()
+    if new_chat_name == 'zips':
+        return "Invalid chat name. Pick another."
 
     subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message,
-                                          channel_name=new_channel_name)
+                                          chat_name=new_chat_name)
 
-    old_channel_path = get_channel_path(subscriber.channel_name)
-    new_channel_path = get_channel_path(new_channel_name)
+    old_chat_path = get_chat_path(subscriber.chat_name)
+    new_chat_path = get_chat_path(new_chat_name)
 
-    new_real_path = os.path.realpath(new_channel_path)
+    new_real_path = os.path.realpath(new_chat_path)
     target_real_path = os.path.realpath(config.TARGET_DIR)
     if not new_real_path.startswith(target_real_path) or \
             new_real_path == target_real_path:
         user = await archive.get_entity(event.message.from_id)
         sentry.captureMessage("User tried to escape directory.",
-                              extra={'new_channel_name': new_channel_name,
-                                     'channel': subscriber.channel_name,
+                              extra={'new_chat_name': new_chat_name,
+                                     'chat': subscriber.chat_name,
                                      'user': get_username(user)},
                               tags={'level': 'info'})
 
-        return "Please stop fooling around and try to escape the directory. I have been notified as well."
+        return "Please stop fooling around and don't try to escape the directory. I have been notified about this."
 
     if session.query(Subscriber) \
-            .filter(Subscriber.channel_name == new_channel_name) \
+            .filter(Subscriber.chat_name == new_chat_name) \
             .one_or_none():
-        return "Channel name already exists. Please choose another one."
+        return "chat name already exists. Please choose another one."
 
-    elif old_channel_path != new_channel_path:
-        subscriber.channel_name = new_channel_name
-        if os.path.exists(old_channel_path):
-            os.rename(old_channel_path, new_channel_path)
-        return "Channel name changed."
+    elif old_chat_path != new_chat_path:
+        subscriber.chat_name = new_chat_name
+        if os.path.exists(old_chat_path):
+            os.rename(old_chat_path, new_chat_path)
+        return "chat name changed."
 
 
 @archive.on(events.NewMessage(pattern='/verbose'))
@@ -160,7 +160,7 @@ async def start(event, session):
     subscriber.active = True
     session.add(subscriber)
 
-    return 'Files posted in this channel will now be archived.'
+    return 'Files posted in this chat will now be archived.'
 
 
 @archive.on(events.NewMessage(pattern='/stop'))
@@ -183,12 +183,12 @@ async def clear_history(event, session):
     to_id, to_type = get_peer_information(event.message.to_id)
     subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message)
 
-    channel_path = get_channel_path(subscriber.channel_name)
+    chat_path = get_chat_path(subscriber.chat_name)
     for known_file in subscriber.files:
         session.delete(known_file)
 
-    if os.path.exists(channel_path):
-        shutil.rmtree(channel_path)
+    if os.path.exists(chat_path):
+        shutil.rmtree(chat_path)
 
     session.commit()
 
@@ -219,16 +219,16 @@ async def zip(event, session):
     to_id, to_type = get_peer_information(event.message.to_id)
     subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message)
 
-    channel_path = get_channel_path(subscriber.channel_name)
-    if not os.path.exists(channel_path):
-        return "No files for this channel yet."
+    chat_path = get_chat_path(subscriber.chat_name)
+    if not os.path.exists(chat_path):
+        return "No files for this chat yet."
 
-    zip_dir = init_zip_dir(subscriber.channel_name)
+    zip_dir = init_zip_dir(subscriber.chat_name)
 
     text = f"Zipping started, this might take some time. Please don't issue this command again until I'm finished."
     await event.respond(text)
 
-    create_zips(subscriber.channel_name, zip_dir, channel_path)
+    create_zips(subscriber.chat_name, zip_dir, chat_path)
 
     text = "Zipping is completed. I'll now start uploading."
     await event.respond(text)
@@ -271,9 +271,9 @@ async def process_message(session, subscriber, message, event):
             user_id = message.from_id
             user = await archive.get_entity(message.from_id)
     except ValueError:
-        # Handle channels. Channels always have None for user_id:
+        # Handle chats. chats always have None for user_id:
         if user_id is None:
-            user_id = subscriber.channel_name
+            user_id = subscriber.chat_name
         user = UnknownUser(user_id)
 
     # Check if we should accept this message

@@ -58,7 +58,7 @@ You will receive a login code, which has to be entered on the first start and ev
 
 
 ## Commands:
-In group channels the bot expects a command in combination with its username.
+In group chats the bot expects a command in combination with its username.
 E.g. `/start@bot_user_name`
 
     /start Start the bot

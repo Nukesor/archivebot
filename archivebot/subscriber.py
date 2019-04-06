@@ -12,7 +12,7 @@ class Subscriber(base):
 
     chat_id = Column(String, primary_key=True)
     chat_type = Column(String, primary_key=True)
-    channel_name = Column(String, nullable=False)
+    chat_name = Column(String, nullable=False)
     accepted_media = Column(String, nullable=False, default='')
     allow_duplicates = Column(Boolean, nullable=False, default=True)
     active = Column(Boolean, nullable=False, default=False)
@@ -21,15 +21,15 @@ class Subscriber(base):
 
     files = relationship("File")
 
-    def __init__(self, chat_id, chat_type, channel_name=None, accepted_media='document'):
+    def __init__(self, chat_id, chat_type, chat_name=None, accepted_media='document'):
         """Create a new subscriber."""
         self.chat_id = chat_id
         self.chat_type = chat_type
-        self.channel_name = channel_name or chat_id
+        self.chat_name = chat_name or chat_id
         self.accepted_media = accepted_media
 
     @staticmethod
-    def get_or_create(session, chat_id, chat_type, message, channel_name=None):
+    def get_or_create(session, chat_id, chat_type, message, chat_name=None):
         """Get or create a new subscriber."""
         # If we have a user chat, we use the combination of both member ids to compile our own
         # unique identifier for this chat, since telegram doesn't give us a unique chat id for user chats.
@@ -40,7 +40,7 @@ class Subscriber(base):
 
         subscriber = session.query(Subscriber).get((chat_id, chat_type))
         if not subscriber:
-            subscriber = Subscriber(chat_id, chat_type, channel_name=channel_name)
+            subscriber = Subscriber(chat_id, chat_type, chat_name=chat_name)
             session.add(subscriber)
             session.commit()
 
