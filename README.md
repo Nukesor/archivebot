@@ -28,6 +28,12 @@ To send multiple uncompressed pictures and videos with your phone:
 - Verbose option for notifying users of duplicates or compressed images.
 
 
+## Stuff that's not working:
+
+- I don't get all media files yet. Feel free to create a pull request for this.
+- There is a bug that involves handling users without a nickname. Since I'm not using the bot actively right now, I couldn't be bothered to fix this edgecase yet.
+- Probably something else :D
+
 ## Installation and starting:
 
 Clone the repository: 
