@@ -85,48 +85,48 @@ async def set_name(event, session):
     if session.query(Subscriber) \
             .filter(Subscriber.chat_name == new_chat_name) \
             .one_or_none():
-        return "chat name already exists. Please choose another one."
+        return "Chat name already exists. Please choose another one."
 
     elif old_chat_path != new_chat_path:
         subscriber.chat_name = new_chat_name
         if os.path.exists(old_chat_path):
             os.rename(old_chat_path, new_chat_path)
-        return "chat name changed."
+        return "Chat name changed."
 
 
 @archive.on(events.NewMessage(pattern='/verbose'))
 @session_wrapper()
 async def set_verbose(event, session):
     """Set query attributes."""
-    subscriber, value = await get_option_for_subscriber(event, session)
+    subscriber, verbose = await get_option_for_subscriber(event, session)
     if subscriber is None:
         return
 
-    subscriber.verbose = value
-    return f"I'm now configured to be {'verbose' if value else 'sneaky'}."
+    subscriber.verbose = verbose
+    return f"I'm now configured to be {'verbose' if verbose else 'sneaky'}."
 
 
 @archive.on(events.NewMessage(pattern='/allow_duplicates'))
 @session_wrapper()
 async def allow_duplicates(event, session):
     """Set query attributes."""
-    subscriber, value = await get_option_for_subscriber(event, session)
+    subscriber, allowed = await get_option_for_subscriber(event, session)
     if subscriber is None:
         return
 
-    subscriber.allow_duplicates = value
-    return f"I'm now configured to {'' if value else 'not'} allow duplicate file names."
+    subscriber.allow_duplicates = allowed
+    return f"I'm now configured to {'' if allowed else 'not'} allow duplicate file names."
 
 
 @archive.on(events.NewMessage(pattern='/sort_by_user'))
 @session_wrapper()
 async def set_sort_by_user(event, session):
     """Set query attributes."""
-    subscriber, value = await get_option_for_subscriber(event, session)
+    subscriber, sorting = await get_option_for_subscriber(event, session)
     if subscriber is None:
         return
-    subscriber.sort_by_user = value
-    return f"{'Sorting' if value else 'Not sorting'} by user."
+    subscriber.sort_by_user = sorting
+    return f"{'Sorting' if sorting else 'Not sorting'} by user."
 
 
 @archive.on(events.NewMessage(pattern='/accept'))
