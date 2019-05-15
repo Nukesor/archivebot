@@ -16,6 +16,12 @@ To send multiple uncompressed pictures and videos with your phone:
 2. Select `File`
 3. Select Gallery (To send images without compression)
 
+
+**WARNING:**  
+This is a side hobby project of mine. It has been developed for Linux and I haven't used it in quite a while.  
+**It probably has some bugs and I don't have the time to fix this project right now.**  
+Anyway I'm happy about PR's, feel free to help out!  
+
 ## Features:
 
 - Zip all files and post it into the chat with the simple `/zip` command.
