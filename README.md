@@ -50,7 +50,7 @@ Now copy the `archivebot/config.example.py` to `archivebot/config.py` and adjust
 Finally execute following commands to install all dependencies, initialize the database and to start the bot:
 
     % make
-    % ./venv/bin/activate
+    % source ./venv/bin/activate
     % ./initdb.py
     % ./main.py
 
