@@ -161,7 +161,6 @@ async def get_file_information(event, message, subscriber, user):
 
     # Check for a photo
     if 'photo' in accepted_media and message.photo is not None:
-        file_type = 'document'
         file_type = 'photo'
         file_id = message.photo.id
     elif message.photo is not None:

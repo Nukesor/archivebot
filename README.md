@@ -39,7 +39,7 @@ There might be some bugs, but I didn't find them yet. I'm happy about any PR's, 
 
 ## Stuff that's not working:
 
-- I don't get handle media files yet. Feel free to create a pull request for this.
+- I don't handle all media files yet. Feel free to create a pull request for this.
 
 ## Installation and starting:
 
