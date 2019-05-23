@@ -205,6 +205,7 @@ async def scan_chat(event, session):
     to_id, to_type = get_peer_information(event.message.to_id)
     subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message)
 
+    await event.respond('Starting full chat scan.')
     async for message in archive.iter_messages(event.message.to_id):
         try:
             await process_message(session, subscriber, message, event)
@@ -212,7 +213,7 @@ async def scan_chat(event, session):
             # Ignore bad message errors
             return
 
-    return "Chat scan successful."
+    return "Full chat scan successful."
 
 
 @archive.on(events.NewMessage(pattern='/zip'))
