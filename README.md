@@ -39,9 +39,8 @@ There might be some bugs, but I didn't find them yet. I'm happy about any PR's, 
 
 ## Stuff that's not working:
 
-- I don't get all media files yet. Feel free to create a pull request for this.
-- There is a bug that involves handling users without a nickname. Since I'm not using the bot actively right now, I couldn't be bothered to fix this edgecase yet.
-- Probably something else :D
+- I don't get handle media files yet. Feel free to create a pull request for this.
+- There is probably something not working :D
 
 ## Installation and starting:
 
@@ -52,6 +51,7 @@ Clone the repository:
 Now copy the `archivebot/config.example.py` to `archivebot/config.py` and adjust all necessary values.
 You'll need `poetry` to setup a virtualenv and run everything conveniently.
 (If you don't want poetry, you need to install the dependencies defined in `pyproject.toml` by hand.)
+
 Finally execute following commands to install all dependencies, initialize the database and to start the bot:
 
     % poetry install
@@ -59,7 +59,7 @@ Finally execute following commands to install all dependencies, initialize the d
     % poetry run ./main.py
 
 
-Additionally, if you want to use the zip feature, you need to install 7zip on your system.
+Additionally, if you want to use the zip feature, you need to install `7zip` on your system.
 
 
 ## Configuration
@@ -74,8 +74,8 @@ You will receive a login code, which has to be entered on the first start and ev
 
 
 ## Commands:
-In group chats the bot expects a command in combination with its username.
-E.g. `/start@bot_user_name`
+In group chats the bot expects a command in combination with its username. (In userbot mode that's your own username)
+E.g. `/start@some_bot_name` or `/start@Nukesor`
 
     /start Start the bot
     /stop Stop the bot
