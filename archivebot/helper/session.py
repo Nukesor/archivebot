@@ -12,13 +12,13 @@ def session_wrapper(addressed=True):
             if addressed:
                 # Check if this message is meant for us
                 bot_user = await event.client.get_me()
-                username = bot_user.username
+                username = bot_user.username.lower()
                 recipient_string = f'@{username}'
 
                 # Accept all commands coming directly from a user
                 # Only accept commands send with an recipient string
                 command = event.message.message.split(' ', maxsplit=1)[0]
-                if recipient_string not in command:
+                if recipient_string not in command.lower():
                     return
 
             session = get_session()

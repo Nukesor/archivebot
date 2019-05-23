@@ -22,9 +22,8 @@ To send multiple uncompressed pictures and videos with your phone:
 
 
 **WARNING:**  
-This is a side hobby project of mine. It has been developed for Linux and I haven't used it in quite a while.  
-**It probably has some bugs and I don't have the time to fix this project right now.**  
-Anyway I'm happy about PR's, feel free to help out!  
+This is a hobby side project of mine. It has been developed for use on Linux, but might work on windows as well.
+There might be some bugs, but I didn't find them yet. I'm happy about any PR's, feel free to help out!  
 
 ## Features:
 

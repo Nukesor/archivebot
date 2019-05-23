@@ -145,8 +145,23 @@ async def get_file_information(event, message, subscriber, user):
 
     accepted_media = subscriber.accepted_media.split(' ')
 
-    if 'photo' in accepted_media \
-            and message.photo is not None:
+    # Check for stickers
+    if 'sticker' in accepted_media and message.sticker is not None:
+        file_type = 'sticker'
+        file_id = message.document.id
+
+    # We just got a sticker, but we don't want any
+    elif message.sticker is not None:
+        return None, None
+
+    # Check for a document
+    if 'document' in accepted_media and message.document is not None:
+        file_type = 'document'
+        file_id = message.document.id
+
+    # Check for a photo
+    if 'photo' in accepted_media and message.photo is not None:
+        file_type = 'document'
         file_type = 'photo'
         file_id = message.photo.id
     elif message.photo is not None:
@@ -154,11 +169,6 @@ async def get_file_information(event, message, subscriber, user):
         if subscriber.verbose:
             text = f"Please send uncompressed files @{user.username} :(."
             await event.respond(text)
-
-    if 'document' in accepted_media \
-            and message.document is not None:
-        file_type = 'document'
-        file_id = message.document.id
 
     return file_type, file_id
 

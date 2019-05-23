@@ -19,8 +19,8 @@ class Config:
     # Only needed, if you want to monitor your bot in production with sentry.
     SENTRY_KEY = None
 
-    # Allowed media types
-    ALLOWED_MEDIA_TYPES = ['photo', 'document']
+    # Allowed media types (those will be downloaded)
+    ALLOWED_MEDIA_TYPES = ['photo', 'document', 'sticker']
 
 
 config = Config()
