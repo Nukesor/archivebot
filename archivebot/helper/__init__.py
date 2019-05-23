@@ -1,10 +1,7 @@
 """Some static stuff or helper functions for archive bot."""
-import traceback
 from telethon import types
 
-from archivebot.db import get_session
-from archivebot.sentry import sentry
-from archivebot.subscriber import Subscriber
+from archivebot.models import Subscriber
 
 
 possible_media = ['document', 'photo']
@@ -54,42 +51,6 @@ Sort files by User: {subscriber.sort_by_user}
 """
 
 
-def session_wrapper(addressed=True):
-    """Allow to differentiate between addressed commands and all messages."""
-    def real_session_wrapper(func):
-        """Wrap a telethon event to create a session and handle exceptions."""
-        async def wrapper(event):
-            if addressed:
-                # Check if this message is meant for us
-                bot_user = await event.client.get_me()
-                username = bot_user.username
-                recipient_string = f'@{username}'
-                _, chat_type = get_peer_information(event.message.to_id)
-
-                # Accept all commands coming directly from a user
-                # Only accept commands send with an recipient string
-                command = event.message.message.split(' ', maxsplit=1)[0]
-                if recipient_string not in command:
-                    return
-
-            session = get_session()
-            try:
-                response = await func(event, session)
-                session.commit()
-                if response:
-                    await event.respond(response)
-            except BaseException:
-                if addressed:
-                    await event.respond("Some unknown error occurred.")
-                traceback.print_exc()
-                sentry.captureException()
-            finally:
-                session.remove()
-        return wrapper
-
-    return real_session_wrapper
-
-
 async def get_option_for_subscriber(event, session):
     """Return the resolved option value and the subscriber for a command."""
     chat_id, chat_type = get_peer_information(event.message.to_id)
@@ -108,23 +69,28 @@ async def get_option_for_subscriber(event, session):
 
 
 def get_username(user):
-    """Get a username from a user."""
+    """Get a username from a user.
+
+    Try to get any name first, fallback to id.
+    """
     if user.username:
         return user.username
     elif user.first_name:
         return user.first_name
     elif user.last_name:
         return user.last_name
+    else:
+        return str(user.id)
 
 
-def get_peer_information(chat):
+def get_peer_information(peer):
     """Get the id depending on the chat type."""
-    if isinstance(chat, types.PeerUser):
-        return chat.user_id, 'user'
-    elif isinstance(chat, types.PeerChat):
-        return chat.chat_id, 'chat'
-    elif isinstance(chat, types.Peerchat):
-        return chat.chat_id, 'chat'
+    if isinstance(peer, types.PeerUser):
+        return peer.user_id, 'user'
+    elif isinstance(peer, types.Peerpeer):
+        return peer.chat_id, 'peer'
+    elif isinstance(peer, types.PeerChannel):
+        return peer.channel_id, 'channel'
     else:
         raise Exception("Unknown chat type")
 

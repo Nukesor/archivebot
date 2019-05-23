@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "archivebot"
+version = "0.1.0"
+description = "A telegram bot for backing up and collecting all kinds of media."
+authors = ["Arne Beer <contact@arne.beer>"]
+license = "MIT"
+repository = "https://github.com/nukesor/archivebot"
+
+[tool.poetry.dependencies]
+python = "^3.5 || ^3.6 || ^3.7"
+cryptg = "^0.1.0.7"
+telethon = "^1.7.7"
+SQLAlchemy = "^1.3"
+sqlalchemy-utils = "^0.33"
+raven = "^6.10"
+
+[tool.poetry.dev-dependencies]
+pytest-mock = "^1.10"
+pytest = "^4.0"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

@@ -4,7 +4,7 @@ import subprocess
 from telethon import types
 from datetime import datetime
 
-from archivebot.file import File
+from archivebot.models.file import File
 from archivebot.config import config
 from archivebot.sentry import sentry
 from archivebot.helper import (

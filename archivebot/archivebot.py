@@ -1,25 +1,28 @@
 """A bot which downloads various files from chats."""
 import os
-from telethon import TelegramClient, events
+from telethon import TelegramClient, events, types
 from telethon.errors import BadMessageError
 import shutil
 
 from archivebot.config import config
-from archivebot.file import File # noqa
-from archivebot.subscriber import Subscriber
 from archivebot.sentry import sentry
+from archivebot.models import ( # noqa
+    File,
+    Subscriber,
+)
+
 from archivebot.helper import (
     get_peer_information,
     get_info_text,
     get_option_for_subscriber,
     help_text,
     possible_media,
-    session_wrapper,
     should_accept_message,
     get_username,
     UnknownUser,
 )
-from archivebot.file_helper import (
+from archivebot.helper.session import session_wrapper
+from archivebot.helper.file import (
     create_file,
     create_zips,
     get_chat_path,
@@ -73,7 +76,7 @@ async def set_name(event, session):
     target_real_path = os.path.realpath(config.TARGET_DIR)
     if not new_real_path.startswith(target_real_path) or \
             new_real_path == target_real_path:
-        user = await archive.get_entity(event.message.from_id)
+        user = await archive.get_entity(types.PeerUser(event.message.from_id))
         sentry.captureMessage("User tried to escape directory.",
                               extra={'new_chat_name': new_chat_name,
                                      'chat': subscriber.chat_name,
@@ -264,25 +267,29 @@ async def process_message(session, subscriber, message, event):
         # If this message is forwarded, get the original sender.
         if message.forward:
             user_id = message.forward.sender_id
-            user = await message.forward.get_sender()
+            sender = await message.forward.get_sender()
+
+            # A channel can be a sender as well, early return if the sender is no User
+            if not isinstance(sender, types.User):
+                return
+            user = sender
+
         else:
             # Ignore messages with no sent user
             if message.from_id is None:
                 return
+
             user_id = message.from_id
             user = await archive.get_entity(message.from_id)
+
     except ValueError:
-        # Handle chats. chats always have None for user_id:
+        # Handle broadcast channels those have None for user_id:
         if user_id is None:
             user_id = subscriber.chat_name
         user = UnknownUser(user_id)
 
     # Check if we should accept this message
     if not await should_accept_message(event, message, user, subscriber):
-        return
-
-    # Ignore users with absolutely no name
-    if user.last_name is None and user.first_name is None and user.username is None:
         return
 
     # Create a new file. If it's not possible or not wanted, return None

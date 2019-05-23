@@ -1,7 +1,0 @@
-cryptg
-telethon
-SQLAlchemy~=1.2
-sqlalchemy-utils~=0.33
-
-# Logging
-raven

@@ -47,12 +47,13 @@ Clone the repository:
     % git clone git@github.com:nukesor/archivebot && cd archivebot
 
 Now copy the `archivebot/config.example.py` to `archivebot/config.py` and adjust all necessary values.
+You'll need `poetry` to setup a virtualenv and run everything conveniently.
+(If you don't want poetry, you need to install the dependencies defined in `pyproject.toml` by hand.)
 Finally execute following commands to install all dependencies, initialize the database and to start the bot:
 
-    % make
-    % source ./venv/bin/activate
-    % ./initdb.py
-    % ./main.py
+    % poetry install
+    % poetry run ./initdb.py
+    % poetry run ./main.py
 
 
 Additionally, if you want to use the zip feature, you need to install 7zip on your system.
