@@ -40,7 +40,6 @@ There might be some bugs, but I didn't find them yet. I'm happy about any PR's, 
 ## Stuff that's not working:
 
 - I don't get handle media files yet. Feel free to create a pull request for this.
-- There is probably something not working :D
 
 ## Installation and starting:
 
