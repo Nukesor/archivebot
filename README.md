@@ -1,5 +1,9 @@
 # Archive-Bot
 
+[![MIT Licence](https://img.shields.io/badge/license-MIT-success.svg)](https://github.com/Nukesor/archivebot/blob/master/LICENSE.md)
+[![Paypal](https://github.com/Nukesor/images/blob/master/paypal-donate-blue.svg)](https://www.paypal.me/arnebeer/)
+[![Patreon](https://github.com/Nukesor/images/blob/master/patreon-donate-blue.svg)](https://www.patreon.com/nukesor)
+
 A handy bot which enables to download files from telegram chats to your server.
 
 It features a full backup of all files posted in a chat and a continuous backup of incoming new media.
