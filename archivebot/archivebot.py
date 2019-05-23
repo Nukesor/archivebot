@@ -255,6 +255,7 @@ async def process(event, session):
         # Ignore bad message errors
         return
 
+
 async def process_message(session, subscriber, message, event):
     """Process a single message."""
     to_id, to_type = get_peer_information(message.to_id)
@@ -281,7 +282,7 @@ async def process_message(session, subscriber, message, event):
         return
 
     # Ignore users with absolutely no name
-    if user.last_name is None or user.first_name is None or user.username is None:
+    if user.last_name is None and user.first_name is None and user.username is None:
         return
 
     # Create a new file. If it's not possible or not wanted, return None

@@ -55,4 +55,4 @@ class File(base):
         return session.query(File) \
             .filter(File.file_id == file_id) \
             .filter(File.subscriber == subscriber) \
-            .all()
+            .one_or_none()
