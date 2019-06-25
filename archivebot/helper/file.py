@@ -13,11 +13,11 @@ from archivebot.helper import (
 )
 
 
-async def create_file(session, event, subscriber, message, user):
+async def create_file(session, event, subscriber, message, user, full_scan):
     """Create a file object."""
     to_id, to_type = get_peer_information(message.to_id)
 
-    file_type, file_id = await get_file_information(event, message, subscriber, user)
+    file_type, file_id = await get_file_information(event, message, subscriber, user, full_scan)
     if not file_type:
         return None
 
@@ -138,7 +138,7 @@ def find_file_name(directory, file_name):
     return file_name
 
 
-async def get_file_information(event, message, subscriber, user):
+async def get_file_information(event, message, subscriber, user, full_scan):
     """Check whether we got an allowed file type."""
     file_id = None
     file_type = None
@@ -165,7 +165,7 @@ async def get_file_information(event, message, subscriber, user):
         file_id = message.photo.id
     elif message.photo is not None:
         # Flame the user that compressed photos are evil
-        if subscriber.verbose:
+        if subscriber.verbose and full_scan:
             text = f"Please send uncompressed files @{user.username} :(."
             await event.respond(text)
 

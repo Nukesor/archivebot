@@ -208,7 +208,7 @@ async def scan_chat(event, session):
     await event.respond('Starting full chat scan.')
     async for message in archive.iter_messages(event.message.to_id):
         try:
-            await process_message(session, subscriber, message, event)
+            await process_message(session, subscriber, message, event, full_scan=True)
         except BadMessageError:
             # Ignore bad message errors
             return
@@ -260,7 +260,7 @@ async def process(event, session):
         return
 
 
-async def process_message(session, subscriber, message, event):
+async def process_message(session, subscriber, message, event, full_scan=False):
     """Process a single message."""
     to_id, to_type = get_peer_information(message.to_id)
 
@@ -294,7 +294,7 @@ async def process_message(session, subscriber, message, event):
         return
 
     # Create a new file. If it's not possible or not wanted, return None
-    new_file = await create_file(session, event, subscriber, message, user)
+    new_file = await create_file(session, event, subscriber, message, user, full_scan)
     if new_file is None:
         return None
 
