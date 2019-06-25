@@ -62,6 +62,5 @@ target/
 .ipynb_checkpoints
 
 # Repository kram
-*/**/config.py
 archivebot.db
 *.session*

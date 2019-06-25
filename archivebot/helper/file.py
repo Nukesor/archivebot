@@ -65,12 +65,12 @@ async def create_file(session, event, subscriber, message, user):
 
 def get_chat_path(chat_name):
     """Compile the directory path for this chat."""
-    return os.path.join(config.TARGET_DIR, chat_name)
+    return os.path.join(config['download']['target_dir'], chat_name)
 
 
 def init_zip_dir(chat_name):
     """Compile the directory path for this chat."""
-    zip_dir = os.path.join(config.TARGET_DIR, 'zips')
+    zip_dir = os.path.join(config['download']['target_dir'], 'zips')
     if not os.path.exists(zip_dir):
         os.mkdir(zip_dir)
 
@@ -83,7 +83,7 @@ def init_zip_dir(chat_name):
 
 def get_zip_file_path(chat_name):
     """Compile the directory path for this chat."""
-    return os.path.join(config.TARGET_DIR, 'zips', chat_name)
+    return os.path.join(config['download']['target_dir'], 'zips', chat_name)
 
 
 def get_file_path(subscriber, username, message):

@@ -42,23 +42,27 @@ There might be some bugs, but I didn't find them yet. I'm happy about any PR's, 
 - I don't handle all media files yet. Feel free to create a pull request for this.
 
 ## Installation and starting:
-
-Clone the repository: 
-
-    % git clone git@github.com:nukesor/archivebot && cd archivebot
-
-Now copy the `archivebot/config.example.py` to `archivebot/config.py` and adjust all necessary values.
-You'll need `poetry` to setup a virtualenv and run everything conveniently.
-(If you don't want poetry, you need to install the dependencies defined in `pyproject.toml` by hand.)
-
-Finally execute following commands to install all dependencies, initialize the database and to start the bot:
-
-    % poetry install
-    % poetry run ./initdb.py
-    % poetry run ./main.py
+**This bot is developed for Linux.** Windows isn't tested, but it shouldn't be too hard to make it compatible. Feel free to create a PR.
 
 
-Additionally, if you want to use the zip feature, you need to install `7zip` on your system.
+Dependencies: 
+- `poetry` to setup a virtualenv and run everything conveniently. (If you don't want poetry, you need to install the dependencies defined in `pyproject.toml` by hand.)
+- A sql database. archivebot uses sqlite by default
+- `7zip` if you want to use the zip feature
+
+
+1. Clone the repository: 
+
+        % git clone git@github.com:nukesor/archivebot && cd archivebot
+
+2. Execute the following commands to install all dependencies and to initialize the database:
+
+        % poetry install
+        % poetry run ./initdb.py
+
+3. Either start the archivebot once or copy the `archivebot.toml` manually to `~/.config/archivebot.toml` and adjust all necessary values.
+
+4. Start the bot: `poetry run ./main.py`
 
 
 ## Configuration
@@ -68,7 +72,7 @@ You can choose to run archivebot as a bot with a telegram bot token. If run as a
 
 **If you run the bot as a normal Telegram bot, disable the privacy mode for your bot via the BotFather menu!** Telegram bots can't read group messages by default.
 
-In case you decide to run it as a userbot to access all features, set the bot token to `None` and add your phone number to the configuration.
+In case you decide to run it as a userbot to access all features, set the userbot flag to `true` and add your phone number to the configuration.
 You will receive a login code, which has to be entered on the first start and every time your session expires (which happens pretty much never).
 
 

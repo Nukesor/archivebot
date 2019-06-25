@@ -29,16 +29,16 @@ from archivebot.helper.file import (
     init_zip_dir,
 )
 
-if config.TELEGRAM_BOT_API_KEY is None:
+if config['telegram']['userbot']:
     NAME = 'archivebot'
 else:
-    NAME = config.TELEGRAM_BOT_API_KEY.split(':')[0]
+    NAME = config['telegram']['api_key'].split(':')[0]
 
-archive = TelegramClient(NAME, config.TELEGRAM_APP_API_ID, config.TELEGRAM_APP_API_HASH)
+archive = TelegramClient(NAME, config['telegram']['app_api_id'], config['telegram']['app_api_hash'])
 
 # Ensure save directory for files exists
-if not os.path.exists(config.TARGET_DIR):
-    os.mkdir(config.TARGET_DIR)
+if not os.path.exists(config['download']['target_dir']):
+    os.mkdir(config['download']['target_dir'])
 
 
 @archive.on(events.NewMessage(pattern='/help'))
@@ -73,7 +73,7 @@ async def set_name(event, session):
     new_chat_path = get_chat_path(new_chat_name)
 
     new_real_path = os.path.realpath(new_chat_path)
-    target_real_path = os.path.realpath(config.TARGET_DIR)
+    target_real_path = os.path.realpath(config['download']['target_dir'])
     if not new_real_path.startswith(target_real_path) or \
             new_real_path == target_real_path:
         user = await archive.get_entity(types.PeerUser(event.message.from_id))
@@ -310,9 +310,9 @@ async def process_message(session, subscriber, message, event):
 
 def main():
     """Login and start the bot."""
-    if config.TELEGRAM_BOT_API_KEY is None:
-        archive.start(phone=config.TELEGRAM_PHONE_NUMBER)
+    if config['telegram']['userbot']:
+        archive.start(phone=config['telegram']['phone_number'])
     else:
-        archive.start(bot_token=config.TELEGRAM_BOT_API_KEY)
+        archive.start(bot_token=config['telegram']['api_key'])
 
     archive.run_until_disconnected()
