@@ -1,13 +1,7 @@
-default: venv
+default: install
 
-venv:
-	python3 -m venv venv
-	venv/bin/pip install --upgrade pip
-	venv/bin/pip install -r requirements.txt --upgrade
-	venv/bin/pip install -r requirements-dev.txt --upgrade
+install:
+	poetry install
 
-dev: venv
-	venv/bin/pip install -r requirements-dev.txt --upgrade
-
-clean:
-	rm -rf venv
+run:
+	poetry run ./main.py
