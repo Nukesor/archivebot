@@ -9,7 +9,7 @@ repository = "https://github.com/nukesor/archivebot"
 [tool.poetry.dependencies]
 python = "^3.6, ^3.7"
 cryptg = "^0.1.0.7"
-telethon = "^1.7.7"
+telethon = "^1.8.0"
 SQLAlchemy = "^1.3"
 sqlalchemy-utils = "^0.34"
 raven = "^6.10"
