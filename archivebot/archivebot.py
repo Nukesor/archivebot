@@ -1,7 +1,7 @@
 """A bot which downloads various files from chats."""
 import os
 from telethon import TelegramClient, events, types
-from telethon.errors import BadMessageError
+from telethon.errors import BadMessageError, FloodWaitError
 import shutil
 
 from archivebot.config import config
@@ -288,6 +288,12 @@ async def process_message(session, subscriber, message, event, full_scan=False):
         if user_id is None:
             user_id = subscriber.chat_name
         user = UnknownUser(user_id)
+
+    # We got a flood wait error. Wait for the specified time and recursively retry
+    except FloodWaitError as e:
+        time.sleep(e.seconds + 1)
+        process_message(session, subscriber, message, event, full_scan)
+        return
 
     # Check if we should accept this message
     if not await should_accept_message(event, message, user, subscriber):
