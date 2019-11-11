@@ -1,5 +1,6 @@
 """A bot which downloads various files from chats."""
 import os
+import time
 from telethon import TelegramClient, events, types
 from telethon.errors import BadMessageError, FloodWaitError
 import shutil
@@ -283,6 +284,24 @@ async def process_message(session, subscriber, message, event, full_scan=False):
             user_id = message.from_id
             user = await archive.get_entity(message.from_id)
 
+        # Check if we should accept this message
+        if not await should_accept_message(event, message, user, subscriber):
+            return
+
+        # Create a new file. If it's not possible or not wanted, return None
+        new_file = await create_file(session, event, subscriber, message, user, full_scan)
+        if new_file is None:
+            return None
+
+        # Download the file
+        success = await message.download_media(str(new_file.file_path))
+
+        # Download succeeded, if the result is not None
+        if success is not None:
+            # Mark the file as succeeded
+            new_file.success = True
+        session.commit()
+
     except ValueError:
         # Handle broadcast channels those have None for user_id:
         if user_id is None:
@@ -294,24 +313,6 @@ async def process_message(session, subscriber, message, event, full_scan=False):
         time.sleep(e.seconds + 1)
         process_message(session, subscriber, message, event, full_scan)
         return
-
-    # Check if we should accept this message
-    if not await should_accept_message(event, message, user, subscriber):
-        return
-
-    # Create a new file. If it's not possible or not wanted, return None
-    new_file = await create_file(session, event, subscriber, message, user, full_scan)
-    if new_file is None:
-        return None
-
-    # Download the file
-    success = await message.download_media(str(new_file.file_path))
-
-    # Download succeeded, if the result is not None
-    if success is not None:
-        # Mark the file as succeeded
-        new_file.success = True
-    session.commit()
 
 
 def main():
