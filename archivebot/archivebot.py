@@ -199,7 +199,7 @@ async def clear_history(event, session):
 
 
 @archive.on(events.NewMessage(pattern='/scan_chat'))
-@session_wrapper(addressed=False)
+@session_wrapper()
 async def scan_chat(event, session):
     """Check if we received any files."""
     to_id, to_type = get_peer_information(event.message.to_id)
