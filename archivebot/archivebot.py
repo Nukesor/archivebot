@@ -269,12 +269,11 @@ async def process_message(session, subscriber, message, event, full_scan=False):
         # If this message is forwarded, get the original sender.
         if message.forward:
             user_id = message.forward.sender_id
-            sender = await message.forward.get_sender()
+            user = await archive.get_entity(user_id)
 
             # A channel can be a sender as well, early return if the sender is no User
-            if not isinstance(sender, types.User):
+            if not isinstance(user, types.User):
                 return
-            user = sender
 
         else:
             # Ignore messages with no sent user
