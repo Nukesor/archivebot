@@ -267,7 +267,7 @@ async def process_message(session, subscriber, message, event, full_scan=False):
 
     try:
         # If this message is forwarded, get the original sender.
-        if message.forward:
+        if message.forward and message.forward.sender_id is not None:
             user_id = message.forward.sender_id
             user = await archive.get_entity(user_id)
 
