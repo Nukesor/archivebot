@@ -1,4 +1,4 @@
-"""The sqlite model for a subscriber."""
+"""The model for a subscriber."""
 from archivebot.db import base
 
 from sqlalchemy import Column, String, Boolean
@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 
 
 class Subscriber(base):
-    """The sqlite model for a subscriber."""
+    """The model for a subscriber."""
 
     __tablename__ = 'subscriber'
 

@@ -14,7 +14,7 @@ from archivebot.helper import (
 
 
 async def create_file(session, event, subscriber, message, user, full_scan):
-    """Create a file object."""
+    """Create a file object from a message."""
     to_id, to_type = get_peer_information(message.to_id)
 
     file_type, file_id = await get_file_information(event, message, subscriber, user, full_scan)
@@ -69,7 +69,7 @@ def get_chat_path(chat_name):
 
 
 def init_zip_dir(chat_name):
-    """Compile the directory path for this chat."""
+    """Create the zip directory for this chat."""
     zip_dir = os.path.join(config['download']['target_dir'], 'zips')
     if not os.path.exists(zip_dir):
         os.mkdir(zip_dir)
@@ -82,7 +82,7 @@ def init_zip_dir(chat_name):
 
 
 def get_zip_file_path(chat_name):
-    """Compile the directory path for this chat."""
+    """Compile the directory path for the zip directory of this chat."""
     return os.path.join(config['download']['target_dir'], 'zips', chat_name)
 
 
@@ -139,7 +139,11 @@ def find_file_name(directory, file_name):
 
 
 async def get_file_information(event, message, subscriber, user, full_scan):
-    """Check whether we got an allowed file type."""
+    """Extract and return all information about the given file.
+
+        At the same time we check, whether we actually want this file.
+        In case we don't, return None, None
+    """
     file_id = None
     file_type = None
 
@@ -173,7 +177,7 @@ async def get_file_information(event, message, subscriber, user, full_scan):
 
 
 def create_zips(chat_name, zip_dir, target_dir):
-    """Create a zip file from given dir path."""
+    """Create a zip file from a given dir path."""
     file_name = os.path.join(zip_dir, chat_name)
     command = ["7z", "-v1400m", "a", f"{file_name}.7z", target_dir]
 

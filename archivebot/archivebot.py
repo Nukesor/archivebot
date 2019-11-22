@@ -52,7 +52,7 @@ async def help(event, session):
 @archive.on(events.NewMessage(pattern='/info'))
 @session_wrapper()
 async def info(event, session):
-    """Send a help text."""
+    """Send a the information about the current user settings."""
     to_id, to_type = get_peer_information(event.message.to_id)
     subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message)
     return get_info_text(subscriber)
@@ -61,9 +61,10 @@ async def info(event, session):
 @archive.on(events.NewMessage(pattern='/set_name'))
 @session_wrapper()
 async def set_name(event, session):
-    """Set query attributes."""
+    """Set the name of the current chat (also affects the saving directory."""
     to_id, to_type = get_peer_information(event.message.to_id)
     new_chat_name = event.message.message.split(' ', maxsplit=1)[1].strip()
+    # We already save to zips, prevent that
     if new_chat_name == 'zips':
         return "Invalid chat name. Pick another."
 
@@ -73,6 +74,7 @@ async def set_name(event, session):
     old_chat_path = get_chat_path(subscriber.chat_name)
     new_chat_path = get_chat_path(new_chat_name)
 
+    # Handle any command that tries to escape the download directory
     new_real_path = os.path.realpath(new_chat_path)
     target_real_path = os.path.realpath(config['download']['target_dir'])
     if not new_real_path.startswith(target_real_path) or \
@@ -86,11 +88,13 @@ async def set_name(event, session):
 
         return "Please stop fooling around and don't try to escape the directory. I have been notified about this."
 
+    # Check whether we already have a chat with this name
     if session.query(Subscriber) \
             .filter(Subscriber.chat_name == new_chat_name) \
             .one_or_none():
         return "Chat name already exists. Please choose another one."
 
+    # Move the old directory to the new location
     elif old_chat_path != new_chat_path:
         subscriber.chat_name = new_chat_name
         if os.path.exists(old_chat_path):
@@ -101,7 +105,7 @@ async def set_name(event, session):
 @archive.on(events.NewMessage(pattern='/verbose'))
 @session_wrapper()
 async def set_verbose(event, session):
-    """Set query attributes."""
+    """Set the verbosity for this chat."""
     subscriber, verbose = await get_option_for_subscriber(event, session)
     if subscriber is None:
         return
@@ -113,7 +117,7 @@ async def set_verbose(event, session):
 @archive.on(events.NewMessage(pattern='/allow_duplicates'))
 @session_wrapper()
 async def allow_duplicates(event, session):
-    """Set query attributes."""
+    """Set whether duplicat file names are allowed for this chat."""
     subscriber, allowed = await get_option_for_subscriber(event, session)
     if subscriber is None:
         return
@@ -125,7 +129,7 @@ async def allow_duplicates(event, session):
 @archive.on(events.NewMessage(pattern='/sort_by_user'))
 @session_wrapper()
 async def set_sort_by_user(event, session):
-    """Set query attributes."""
+    """Set whether files should be sorted by message author."""
     subscriber, sorting = await get_option_for_subscriber(event, session)
     if subscriber is None:
         return
@@ -136,7 +140,7 @@ async def set_sort_by_user(event, session):
 @archive.on(events.NewMessage(pattern='/accept'))
 @session_wrapper()
 async def accepted_media_types(event, session):
-    """Set query attributes."""
+    """Set the allowed media types for this chat."""
     to_id, to_type = get_peer_information(event.message.to_id)
     subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message)
 
@@ -157,7 +161,7 @@ async def accepted_media_types(event, session):
 @archive.on(events.NewMessage(pattern='/start'))
 @session_wrapper()
 async def start(event, session):
-    """Start the bot."""
+    """Subscribe to this specific chat."""
     to_id, to_type = get_peer_information(event.message.to_id)
 
     subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message)
@@ -170,7 +174,7 @@ async def start(event, session):
 @archive.on(events.NewMessage(pattern='/stop'))
 @session_wrapper()
 async def stop(event, session):
-    """Stop the bot."""
+    """Unsubscribe from this specific chat."""
     to_id, to_type = get_peer_information(event.message.to_id)
 
     subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message)
@@ -183,7 +187,7 @@ async def stop(event, session):
 @archive.on(events.NewMessage(pattern='/clear_history'))
 @session_wrapper()
 async def clear_history(event, session):
-    """Stop the bot."""
+    """Remove every downloaded file from the database and the file system."""
     to_id, to_type = get_peer_information(event.message.to_id)
     subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message)
 
@@ -202,7 +206,7 @@ async def clear_history(event, session):
 @archive.on(events.NewMessage(pattern='/scan_chat'))
 @session_wrapper()
 async def scan_chat(event, session):
-    """Check if we received any files."""
+    """Scan the whole chat for files. Necessary for getting old files."""
     to_id, to_type = get_peer_information(event.message.to_id)
     subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message)
 
@@ -220,7 +224,7 @@ async def scan_chat(event, session):
 @archive.on(events.NewMessage(pattern='/zip'))
 @session_wrapper()
 async def zip(event, session):
-    """Check if we received any files."""
+    """Create 1.5GB zips with all files collectd in this chat."""
     to_id, to_type = get_peer_information(event.message.to_id)
     subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message)
 
@@ -250,7 +254,7 @@ async def zip(event, session):
 @archive.on(events.NewMessage())
 @session_wrapper(addressed=False)
 async def process(event, session):
-    """Check if we received any files."""
+    """Main entry for processing messages and downloading files."""
     to_id, to_type = get_peer_information(event.message.to_id)
     subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message)
 
@@ -262,7 +266,7 @@ async def process(event, session):
 
 
 async def process_message(session, subscriber, message, event, full_scan=False):
-    """Process a single message."""
+    """Process a single message. Check if it has a file we want to download."""
     to_id, to_type = get_peer_information(message.to_id)
 
     try:

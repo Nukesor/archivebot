@@ -1,4 +1,4 @@
-"""The sqlite model for a file."""
+"""The model for a file."""
 from archivebot.db import base
 from sqlalchemy.orm import relationship
 from sqlalchemy import (
@@ -11,7 +11,7 @@ from sqlalchemy import (
 
 
 class File(base):
-    """The sqlite model for a file."""
+    """The model for a file."""
 
     __tablename__ = 'file'
     __table_args__ = (
