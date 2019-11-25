@@ -58,11 +58,11 @@ Dependencies:
 2. Execute the following commands to install all dependencies and to initialize the database:
 
         % poetry install
-        % poetry run ./initdb.py
+        % poetry run python ./initdb.py
 
 3. Either start the archivebot once or copy the `archivebot.toml` manually to `~/.config/archivebot.toml` and adjust all necessary values.
 
-4. Start the bot: `poetry run ./main.py`
+4. Start the bot: `poetry run python ./main.py`
 
 
 ## Configuration
