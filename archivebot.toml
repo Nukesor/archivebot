@@ -16,5 +16,8 @@ sentry_token = ""
 
 [download]
 # Default for downloaded files
-allowed_types = [ "document", "photo",]
+allowed_types = [
+    "document",
+    "photo",
+]
 target_dir = "/home/user/archivebot/"

@@ -7,7 +7,7 @@ import shutil
 
 from archivebot.config import config
 from archivebot.sentry import sentry
-from archivebot.models import ( # noqa
+from archivebot.models import (  # noqa
     File,
     Subscriber,
 )
@@ -30,26 +30,28 @@ from archivebot.helper.file import (
     init_zip_dir,
 )
 
-if config['telegram']['userbot']:
-    NAME = 'archivebot'
+if config["telegram"]["userbot"]:
+    NAME = "archivebot"
 else:
-    NAME = config['telegram']['api_key'].split(':')[0]
+    NAME = config["telegram"]["api_key"].split(":")[0]
 
-archive = TelegramClient(NAME, config['telegram']['app_api_id'], config['telegram']['app_api_hash'])
+archive = TelegramClient(
+    NAME, config["telegram"]["app_api_id"], config["telegram"]["app_api_hash"]
+)
 
 # Ensure save directory for files exists
-if not os.path.exists(config['download']['target_dir']):
-    os.mkdir(config['download']['target_dir'])
+if not os.path.exists(config["download"]["target_dir"]):
+    os.mkdir(config["download"]["target_dir"])
 
 
-@archive.on(events.NewMessage(pattern='/help'))
+@archive.on(events.NewMessage(pattern="/help"))
 @session_wrapper()
 async def help(event, session):
     """Send a help text."""
     return help_text
 
 
-@archive.on(events.NewMessage(pattern='/info'))
+@archive.on(events.NewMessage(pattern="/info"))
 @session_wrapper()
 async def info(event, session):
     """Send a the information about the current user settings."""
@@ -58,40 +60,49 @@ async def info(event, session):
     return get_info_text(subscriber)
 
 
-@archive.on(events.NewMessage(pattern='/set_name'))
+@archive.on(events.NewMessage(pattern="/set_name"))
 @session_wrapper()
 async def set_name(event, session):
     """Set the name of the current chat (also affects the saving directory."""
     to_id, to_type = get_peer_information(event.message.to_id)
-    new_chat_name = event.message.message.split(' ', maxsplit=1)[1].strip()
+    new_chat_name = event.message.message.split(" ", maxsplit=1)[1].strip()
     # We already save to zips, prevent that
-    if new_chat_name == 'zips':
+    if new_chat_name == "zips":
         return "Invalid chat name. Pick another."
 
-    subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message,
-                                          chat_name=new_chat_name)
+    subscriber = Subscriber.get_or_create(
+        session, to_id, to_type, event.message, chat_name=new_chat_name
+    )
 
     old_chat_path = get_chat_path(subscriber.chat_name)
     new_chat_path = get_chat_path(new_chat_name)
 
     # Handle any command that tries to escape the download directory
     new_real_path = os.path.realpath(new_chat_path)
-    target_real_path = os.path.realpath(config['download']['target_dir'])
-    if not new_real_path.startswith(target_real_path) or \
-            new_real_path == target_real_path:
+    target_real_path = os.path.realpath(config["download"]["target_dir"])
+    if (
+        not new_real_path.startswith(target_real_path)
+        or new_real_path == target_real_path
+    ):
         user = await archive.get_entity(types.PeerUser(event.message.from_id))
-        sentry.captureMessage("User tried to escape directory.",
-                              extra={'new_chat_name': new_chat_name,
-                                     'chat': subscriber.chat_name,
-                                     'user': get_username(user)},
-                              tags={'level': 'info'})
+        sentry.captureMessage(
+            "User tried to escape directory.",
+            extra={
+                "new_chat_name": new_chat_name,
+                "chat": subscriber.chat_name,
+                "user": get_username(user),
+            },
+            tags={"level": "info"},
+        )
 
         return "Please stop fooling around and don't try to escape the directory. I have been notified about this."
 
     # Check whether we already have a chat with this name
-    if session.query(Subscriber) \
-            .filter(Subscriber.chat_name == new_chat_name) \
-            .one_or_none():
+    if (
+        session.query(Subscriber)
+        .filter(Subscriber.chat_name == new_chat_name)
+        .one_or_none()
+    ):
         return "Chat name already exists. Please choose another one."
 
     # Move the old directory to the new location
@@ -102,7 +113,7 @@ async def set_name(event, session):
         return "Chat name changed."
 
 
-@archive.on(events.NewMessage(pattern='/verbose'))
+@archive.on(events.NewMessage(pattern="/verbose"))
 @session_wrapper()
 async def set_verbose(event, session):
     """Set the verbosity for this chat."""
@@ -114,7 +125,7 @@ async def set_verbose(event, session):
     return f"I'm now configured to be {'verbose' if verbose else 'sneaky'}."
 
 
-@archive.on(events.NewMessage(pattern='/allow_duplicates'))
+@archive.on(events.NewMessage(pattern="/allow_duplicates"))
 @session_wrapper()
 async def allow_duplicates(event, session):
     """Set whether duplicat file names are allowed for this chat."""
@@ -123,10 +134,12 @@ async def allow_duplicates(event, session):
         return
 
     subscriber.allow_duplicates = allowed
-    return f"I'm now configured to {'' if allowed else 'not'} allow duplicate file names."
+    return (
+        f"I'm now configured to {'' if allowed else 'not'} allow duplicate file names."
+    )
 
 
-@archive.on(events.NewMessage(pattern='/sort_by_user'))
+@archive.on(events.NewMessage(pattern="/sort_by_user"))
 @session_wrapper()
 async def set_sort_by_user(event, session):
     """Set whether files should be sorted by message author."""
@@ -137,7 +150,7 @@ async def set_sort_by_user(event, session):
     return f"{'Sorting' if sorting else 'Not sorting'} by user."
 
 
-@archive.on(events.NewMessage(pattern='/accept'))
+@archive.on(events.NewMessage(pattern="/accept"))
 @session_wrapper()
 async def accepted_media_types(event, session):
     """Set the allowed media types for this chat."""
@@ -145,7 +158,7 @@ async def accepted_media_types(event, session):
     subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message)
 
     # Convert the incoming text into an boolean
-    arguments = event.message.message.lower().split(' ')[1:]
+    arguments = event.message.message.lower().split(" ")[1:]
     accepted_media = set()
     for argument in arguments:
         if argument in possible_media:
@@ -154,11 +167,11 @@ async def accepted_media_types(event, session):
     accepted_media = list(accepted_media)
     accepted_media.sort()
 
-    subscriber.accepted_media = ' '.join(accepted_media)
+    subscriber.accepted_media = " ".join(accepted_media)
     return f"Now accepting following media types: {accepted_media}."
 
 
-@archive.on(events.NewMessage(pattern='/start'))
+@archive.on(events.NewMessage(pattern="/start"))
 @session_wrapper()
 async def start(event, session):
     """Subscribe to this specific chat."""
@@ -168,10 +181,10 @@ async def start(event, session):
     subscriber.active = True
     session.add(subscriber)
 
-    return 'Files posted in this chat will now be archived.'
+    return "Files posted in this chat will now be archived."
 
 
-@archive.on(events.NewMessage(pattern='/stop'))
+@archive.on(events.NewMessage(pattern="/stop"))
 @session_wrapper()
 async def stop(event, session):
     """Unsubscribe from this specific chat."""
@@ -184,7 +197,7 @@ async def stop(event, session):
     return "Files won't be archived any longer."
 
 
-@archive.on(events.NewMessage(pattern='/clear_history'))
+@archive.on(events.NewMessage(pattern="/clear_history"))
 @session_wrapper()
 async def clear_history(event, session):
     """Remove every downloaded file from the database and the file system."""
@@ -203,14 +216,14 @@ async def clear_history(event, session):
     return "All files from this chat have been deleted."
 
 
-@archive.on(events.NewMessage(pattern='/scan_chat'))
+@archive.on(events.NewMessage(pattern="/scan_chat"))
 @session_wrapper()
 async def scan_chat(event, session):
     """Scan the whole chat for files. Necessary for getting old files."""
     to_id, to_type = get_peer_information(event.message.to_id)
     subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message)
 
-    await event.respond('Starting full chat scan.')
+    await event.respond("Starting full chat scan.")
     async for message in archive.iter_messages(event.message.to_id):
         try:
             await process_message(session, subscriber, message, event, full_scan=True)
@@ -221,7 +234,7 @@ async def scan_chat(event, session):
     return "Full chat scan successful."
 
 
-@archive.on(events.NewMessage(pattern='/zip'))
+@archive.on(events.NewMessage(pattern="/zip"))
 @session_wrapper()
 async def zip(event, session):
     """Create 1.5GB zips with all files collectd in this chat."""
@@ -292,7 +305,9 @@ async def process_message(session, subscriber, message, event, full_scan=False):
             return
 
         # Create a new file. If it's not possible or not wanted, return None
-        new_file = await create_file(session, event, subscriber, message, user, full_scan)
+        new_file = await create_file(
+            session, event, subscriber, message, user, full_scan
+        )
         if new_file is None:
             return None
 
@@ -320,9 +335,9 @@ async def process_message(session, subscriber, message, event, full_scan=False):
 
 def main():
     """Login and start the bot."""
-    if config['telegram']['userbot']:
-        archive.start(phone=config['telegram']['phone_number'])
+    if config["telegram"]["userbot"]:
+        archive.start(phone=config["telegram"]["phone_number"])
     else:
-        archive.start(bot_token=config['telegram']['api_key'])
+        archive.start(bot_token=config["telegram"]["api_key"])
 
     archive.run_until_disconnected()

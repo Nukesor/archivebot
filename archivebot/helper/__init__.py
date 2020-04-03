@@ -4,7 +4,7 @@ from telethon import types
 from archivebot.models import Subscriber
 
 
-possible_media = ['document', 'photo', 'sticker']
+possible_media = ["document", "photo", "sticker"]
 
 help_text = f"""A handy telegram bot which allows to store files on your server, which are posted in a chat.
 For example, this is great to collect images and videos from all members of your last holiday trip or simply to push backups or interesting files from your telegram chats to your server.
@@ -58,7 +58,7 @@ async def get_option_for_subscriber(event, session):
 
     # Convert the incoming text into an boolean
     try:
-        value = get_bool_from_text(event.message.message.split(' ', maxsplit=1)[1])
+        value = get_bool_from_text(event.message.message.split(" ", maxsplit=1)[1])
     except Exception:
         text = "Got an invalid value. Please use one of [true, false, on, off, 0, 1]"
         await event.respond(text)
@@ -86,20 +86,20 @@ def get_username(user):
 def get_peer_information(peer):
     """Get the id depending on the chat type."""
     if isinstance(peer, types.PeerUser):
-        return peer.user_id, 'user'
+        return peer.user_id, "user"
     elif isinstance(peer, types.PeerChat):
-        return peer.chat_id, 'peer'
+        return peer.chat_id, "peer"
     elif isinstance(peer, types.PeerChannel):
-        return peer.channel_id, 'channel'
+        return peer.channel_id, "channel"
     else:
         raise Exception("Unknown chat type")
 
 
 def get_bool_from_text(text):
     """Check if we can convert this string to bool."""
-    if text.lower() in ['1', 'true', 'on']:
+    if text.lower() in ["1", "true", "on"]:
         return True
-    elif text.lower() in ['0', 'false', 'off']:
+    elif text.lower() in ["0", "false", "off"]:
         return False
     else:
         raise Exception("Unknown boolean text")

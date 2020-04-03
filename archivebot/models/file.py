@@ -13,11 +13,11 @@ from sqlalchemy import (
 class File(base):
     """The model for a file."""
 
-    __tablename__ = 'file'
+    __tablename__ = "file"
     __table_args__ = (
         ForeignKeyConstraint(
-            ['subscriber_chat_id', 'subscriber_chat_type'],
-            ['subscriber.chat_id', 'subscriber.chat_type'],
+            ["subscriber_chat_id", "subscriber_chat_type"],
+            ["subscriber.chat_id", "subscriber.chat_type"],
         ),
     )
 
@@ -35,9 +35,18 @@ class File(base):
     subscriber_chat_id = Column(Integer)
     subscriber_chat_type = Column(String)
 
-    def __init__(self, file_id, to_id, from_id,
-                 subscriber, to_type, message_id,
-                 file_type, file_name, file_path):
+    def __init__(
+        self,
+        file_id,
+        to_id,
+        from_id,
+        subscriber,
+        to_type,
+        message_id,
+        file_type,
+        file_name,
+        file_path,
+    ):
         """Create a new file."""
         self.file_id = file_id
         self.to_id = to_id
@@ -52,7 +61,9 @@ class File(base):
 
     def exists(session, subscriber, file_id):
         """Check if we already have this file."""
-        return session.query(File) \
-            .filter(File.file_id == file_id) \
-            .filter(File.subscriber == subscriber) \
+        return (
+            session.query(File)
+            .filter(File.file_id == file_id)
+            .filter(File.subscriber == subscriber)
             .one_or_none()
+        )

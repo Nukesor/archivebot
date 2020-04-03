@@ -3,8 +3,8 @@
 
 from sqlalchemy_utils.functions import database_exists, create_database
 from archivebot.db import engine, base
-from archivebot.models.file import File # noqa
-from archivebot.models.subscriber import Subscriber # noqa
+from archivebot.models.file import File  # noqa
+from archivebot.models.subscriber import Subscriber  # noqa
 
 db_url = engine.url
 if not database_exists(db_url):

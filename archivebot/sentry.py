@@ -13,28 +13,28 @@ class Sentry(object):
 
     def __init__(self):
         """Construct new sentry wrapper."""
-        if config['logging']['sentry_enabled']:
+        if config["logging"]["sentry_enabled"]:
             self.initialized = True
-            self.sentry = Client(config['logging']['sentry_token'])
+            self.sentry = Client(config["logging"]["sentry_token"])
 
     def captureMessage(self, *args, **kwargs):
         """Capture message with sentry."""
         if self.initialized:
-            if 'tags' not in kwargs:
-                kwargs['tags'] = {}
+            if "tags" not in kwargs:
+                kwargs["tags"] = {}
 
             # Tag it as hetznerbot
-            kwargs['tags']['bot'] = 'archivebot'
+            kwargs["tags"]["bot"] = "archivebot"
             self.sentry.captureMessage(*args, **kwargs)
 
     def captureException(self, *args, **kwargs):
         """Capture exception with sentry."""
         if self.initialized:
-            if 'tags' not in kwargs:
-                kwargs['tags'] = {}
+            if "tags" not in kwargs:
+                kwargs["tags"] = {}
 
             # Tag it as hetznerbot
-            kwargs['tags']['bot'] = 'archivebot'
+            kwargs["tags"]["bot"] = "archivebot"
             self.sentry.captureException(*args, **kwargs)
 
 

@@ -17,7 +17,9 @@ async def create_file(session, event, subscriber, message, user, full_scan):
     """Create a file object from a message."""
     to_id, to_type = get_peer_information(message.to_id)
 
-    file_type, file_id = await get_file_information(event, message, subscriber, user, full_scan)
+    file_type, file_id = await get_file_information(
+        event, message, subscriber, user, full_scan
+    )
     if not file_type:
         return None
 
@@ -34,8 +36,8 @@ async def create_file(session, event, subscriber, message, user, full_scan):
     # Don't check zipped files from ourselves.
     # Otherwise we would double in size on each /scan_chat /zip command combination
     me = await event.client.get_me()
-    splitted = file_name.rsplit('.', maxsplit=2)
-    if user.id == me.id and len(splitted) == 3 and splitted[1] == '7z':
+    splitted = file_name.rsplit(".", maxsplit=2)
+    if user.id == me.id and len(splitted) == 3 and splitted[1] == "7z":
         return None
 
     if file_path is None:
@@ -44,18 +46,30 @@ async def create_file(session, event, subscriber, message, user, full_scan):
             text = f"File with name {file_name} already exists."
             await event.respond(text)
 
-        sentry.captureMessage("File already exists",
-                              extra={'file_path': file_path,
-                                     'file_name': file_name,
-                                     'chat': subscriber.chat_name,
-                                     'user': get_username(user)},
-                              tags={'level': 'info'})
+        sentry.captureMessage(
+            "File already exists",
+            extra={
+                "file_path": file_path,
+                "file_name": file_name,
+                "chat": subscriber.chat_name,
+                "user": get_username(user),
+            },
+            tags={"level": "info"},
+        )
         return None
 
     # The file path is depending on the media type.
-    new_file = File(file_id, to_id, user.id,
-                    subscriber, to_type, message.id,
-                    file_type, file_name, file_path)
+    new_file = File(
+        file_id,
+        to_id,
+        user.id,
+        subscriber,
+        to_type,
+        message.id,
+        file_type,
+        file_name,
+        file_path,
+    )
 
     session.add(new_file)
     session.commit()
@@ -65,12 +79,12 @@ async def create_file(session, event, subscriber, message, user, full_scan):
 
 def get_chat_path(chat_name):
     """Compile the directory path for this chat."""
-    return os.path.join(config['download']['target_dir'], chat_name)
+    return os.path.join(config["download"]["target_dir"], chat_name)
 
 
 def init_zip_dir(chat_name):
     """Create the zip directory for this chat."""
-    zip_dir = os.path.join(config['download']['target_dir'], 'zips')
+    zip_dir = os.path.join(config["download"]["target_dir"], "zips")
     if not os.path.exists(zip_dir):
         os.mkdir(zip_dir)
 
@@ -83,7 +97,7 @@ def init_zip_dir(chat_name):
 
 def get_zip_file_path(chat_name):
     """Compile the directory path for the zip directory of this chat."""
-    return os.path.join(config['download']['target_dir'], 'zips', chat_name)
+    return os.path.join(config["download"]["target_dir"], "zips", chat_name)
 
 
 def get_file_path(subscriber, username, message):
@@ -93,10 +107,7 @@ def get_file_path(subscriber, username, message):
         directory = get_chat_path(subscriber.chat_name)
     # sort_by_user is active. Add the user directory.
     else:
-        directory = os.path.join(
-            get_chat_path(subscriber.chat_name),
-            username.lower(),
-        )
+        directory = os.path.join(get_chat_path(subscriber.chat_name), username.lower(),)
 
     # Create the directory
     if not os.path.exists(directory):
@@ -119,7 +130,7 @@ def get_file_path(subscriber, username, message):
                 file_path = os.path.join(directory, file_name)
                 return (file_path, file_name)
 
-    file_name = datetime.now().strftime('media_%Y-%m-%d_%H-%M-%S')
+    file_name = datetime.now().strftime("media_%Y-%m-%d_%H-%M-%S")
     file_path = os.path.join(directory, file_name)
     # We have a photo. Photos have no file name, thereby return the directory
     # and let telethon decide the name of the file.
@@ -147,11 +158,11 @@ async def get_file_information(event, message, subscriber, user, full_scan):
     file_id = None
     file_type = None
 
-    accepted_media = subscriber.accepted_media.split(' ')
+    accepted_media = subscriber.accepted_media.split(" ")
 
     # Check for stickers
-    if 'sticker' in accepted_media and message.sticker is not None:
-        file_type = 'sticker'
+    if "sticker" in accepted_media and message.sticker is not None:
+        file_type = "sticker"
         file_id = message.document.id
 
     # We just got a sticker, but we don't want any
@@ -159,13 +170,13 @@ async def get_file_information(event, message, subscriber, user, full_scan):
         return None, None
 
     # Check for a document
-    if 'document' in accepted_media and message.document is not None:
-        file_type = 'document'
+    if "document" in accepted_media and message.document is not None:
+        file_type = "document"
         file_id = message.document.id
 
     # Check for a photo
-    if 'photo' in accepted_media and message.photo is not None:
-        file_type = 'photo'
+    if "photo" in accepted_media and message.photo is not None:
+        file_type = "photo"
         file_id = message.photo.id
     elif message.photo is not None:
         # Flame the user that compressed photos are evil
