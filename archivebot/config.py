@@ -16,6 +16,9 @@ default_config = {
     "download": {
         "allowed_types": ["document", "photo"],
         "target_dir": "/home/user/archivebot/",
+        "7z": {
+            "volume_size": "1400m",
+        }
     },
 }
 
