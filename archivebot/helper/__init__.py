@@ -2,6 +2,7 @@
 from telethon import types
 
 from archivebot.models import Subscriber
+from archivebot.config import config
 
 
 possible_media = ["document", "photo", "sticker"]
@@ -40,7 +41,7 @@ Available commands:
 
 def get_info_text(subscriber):
     """Format the info text."""
-    return f"""Current settings:
+    info = f"""Current settings:
 
 Name: {subscriber.chat_name}
 Active: {subscriber.active}
@@ -50,6 +51,11 @@ Allow duplicates: {subscriber.allow_duplicates}
 Sort files by User: {subscriber.sort_by_user}
 """
 
+    if config["download"]["preview"]["enabled"]:
+        base_url = config["download"]["preview"]["base_url"]
+        info += f"Preview: {base_url}{subscriber.chat_name}"
+
+    return info
 
 async def get_option_for_subscriber(event, session):
     """Return the resolved option value and the subscriber for a command."""

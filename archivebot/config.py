@@ -16,6 +16,18 @@ default_config = {
     "download": {
         "allowed_types": ["document", "photo"],
         "target_dir": "/home/user/archivebot/",
+        "preview": {
+            "enabled": False,
+            "base_url": "https://www.example.com/archivebot/",
+        },
+    },
+    "zip": {
+        "send_file": True,
+        "archive": {
+            "enabled": False,
+            "base_dir": "/home/user/archivebot/archives/",
+            "base_url": "https://www.example.com/archivebot/archives/",
+        },
     },
 }
 

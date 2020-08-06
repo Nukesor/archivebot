@@ -1,5 +1,6 @@
 """A bot which downloads various files from chats."""
 import os
+import datetime
 import time
 from telethon import TelegramClient, events, types
 from telethon.errors import BadMessageError, FloodWaitError
@@ -181,7 +182,13 @@ async def start(event, session):
     subscriber.active = True
     session.add(subscriber)
 
-    return "Files posted in this chat will now be archived."
+    if config["download"]["preview"]["enabled"]:
+        base_url = config["download"]["preview"]["base_url"]
+        msg = f"Files posted in this chat will now be archived here: {base_url}{subscriber.chat_name}"
+    else:
+        msg = "Files posted in this chat will now be archived."
+
+    return msg
 
 
 @archive.on(events.NewMessage(pattern="/stop", outgoing=True))
@@ -255,13 +262,23 @@ async def zip(event, session):
     text = "Zipping is completed. I'll now start uploading."
     await event.respond(text)
 
-    for zip_file in os.listdir(zip_dir):
-        zip_file_path = os.path.join(zip_dir, zip_file)
-        await archive.send_file(event.message.to_id, zip_file_path)
+    if config["zip"]["send_file"]:
+        for zip_file in os.listdir(zip_dir):
+            zip_file_path = os.path.join(zip_dir, zip_file)
+            await archive.send_file(event.message.to_id, zip_file_path)
 
-    shutil.rmtree(zip_dir)
+    if config["zip"]["archive"]["enabled"]:
+        base_dir = config["zip"]["archive"]["base_dir"]
+        now_str = datetime.datetime.now().strftime("%Y/%m%d/%H%M%S")
+        dst = os.path.join(base_dir, subscriber.chat_name, now_str)
+        shutil.move(zip_dir, dst)
+        base_url = config["zip"]["archive"]["base_url"]
+        msg = f"All files are uploaded here: {base_url}{subscriber.chat_name}/{now_str}"
+    else:
+        shutil.rmtree(zip_dir)
+        msg = "All files are uploaded :)"
 
-    return "All files are uploaded :)"
+    return msg
 
 
 @archive.on(events.NewMessage())
