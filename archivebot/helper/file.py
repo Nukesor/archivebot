@@ -190,7 +190,7 @@ async def get_file_information(event, message, subscriber, user, full_scan):
 def create_zips(chat_name, zip_dir, target_dir):
     """Create a zip file from a given dir path."""
     file_name = os.path.join(zip_dir, chat_name)
-    volume_size = config["download"]["7z"]["volume_size"]
+    volume_size = config["zip"]["volume_size"]
     command = ["7z", f"-v{volume_size}", "a", f"{file_name}.7z", target_dir]
 
     subprocess.run(command)
