@@ -18,7 +18,7 @@ default_config = {
         "target_dir": "/home/user/archivebot/",
         "preview": {
             "enabled": False,
-            "base_url": "https://www.example.com/archivebot/",
+            "base_url": "https://www.example.net/archivebot/",
         },
     },
     "zip": {
@@ -26,7 +26,7 @@ default_config = {
         "archive": {
             "enabled": False,
             "base_dir": "/home/user/archivebot/archives/",
-            "base_url": "https://www.example.com/archivebot/archives/",
+            "base_url": "https://www.example.net/archivebot/archives/",
         },
     },
 }
