@@ -28,3 +28,9 @@ if not os.path.exists(config_path):
     sys.exit(1)
 else:
     config = toml.load(config_path)
+
+    # Set default values for any missing keys in the loaded config
+    for key, category in default_config.items():
+        for option, value in category.items():
+            if option not in config[key]:
+                config[key][option] = value
