@@ -237,7 +237,7 @@ async def scan_chat(event, session):
 @archive.on(events.NewMessage(pattern="/zip", outgoing=True))
 @session_wrapper()
 async def zip(event, session):
-    """Create 1.5GB zips with all files collectd in this chat."""
+    """Create 1.5GB(config["zip"]["volume_size"]) zips with all files collectd in this chat."""
     to_id, to_type = get_peer_information(event.message.to_id)
     subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message)
 

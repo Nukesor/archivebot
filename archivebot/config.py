@@ -17,6 +17,9 @@ default_config = {
         "allowed_types": ["document", "photo"],
         "target_dir": "/home/user/archivebot/",
     },
+    "zip": {
+        "volume_size": "1400m",
+    },
 }
 
 config_path = os.path.expanduser("~/.config/archivebot.toml")
