@@ -53,7 +53,7 @@ Sort files by User: {subscriber.sort_by_user}
 
     if config["download"]["preview"]["enabled"]:
         base_url = config["download"]["preview"]["base_url"]
-        info += f"Preview: {base_url}{subscriber.chat_name}"
+        info += f"Preview: {base_url}{subscriber.chat_name}/"
 
     return info
 

@@ -184,7 +184,7 @@ async def start(event, session):
 
     if config["download"]["preview"]["enabled"]:
         base_url = config["download"]["preview"]["base_url"]
-        msg = f"Files posted in this chat will now be archived here: {base_url}{subscriber.chat_name}"
+        msg = f"Files posted in this chat will now be archived here: {base_url}{subscriber.chat_name}/"
     else:
         msg = "Files posted in this chat will now be archived."
 
@@ -273,7 +273,7 @@ async def zip(event, session):
         dst = os.path.join(base_dir, subscriber.chat_name, now_str)
         shutil.move(zip_dir, dst)
         base_url = config["zip"]["archive"]["base_url"]
-        msg = f"All files are uploaded here: {base_url}{subscriber.chat_name}/{now_str}"
+        msg = f"All files are uploaded here: {base_url}{subscriber.chat_name}/{now_str}/"
     else:
         shutil.rmtree(zip_dir)
         msg = "All files are uploaded :)"
