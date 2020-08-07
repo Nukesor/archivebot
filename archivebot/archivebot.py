@@ -252,10 +252,13 @@ async def zip(event, session):
 
     create_zips(subscriber.chat_name, zip_dir, chat_path)
 
-    text = "Zipping is completed. I'll now start uploading."
+    zip_files = sorted(os.listdir(zip_dir))
+    zip_files_count = len(zip_files)
+
+    text = f"Zipping is completed. I'll now start uploading {zip_files_count} file(s)."
     await event.respond(text)
 
-    for zip_file in os.listdir(zip_dir):
+    for zip_file in zip_files:
         zip_file_path = os.path.join(zip_dir, zip_file)
         await archive.send_file(event.message.to_id, zip_file_path)
 
