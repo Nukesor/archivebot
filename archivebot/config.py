@@ -32,7 +32,7 @@ else:
 
     # Set default values for any missing keys in the loaded config
     for key, category in default_config.items():
-        if key not in category:
+        if key not in config:
             config[key] = category
             continue
 
