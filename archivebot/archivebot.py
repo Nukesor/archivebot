@@ -274,17 +274,28 @@ async def process(event, session):
     to_id, to_type = get_peer_information(event.message.to_id)
     subscriber = Subscriber.get_or_create(session, to_id, to_type, event.message)
 
-    try:
-        await process_message(session, subscriber, event.message, event)
-    except BadMessageError:
-        # Ignore bad message errors
-        return
+    tries = 3
+    current_try = 0
+    while tries < current_try:
+        try:
+            await process_message(session, subscriber, event.message, event)
+            return
+        except BadMessageError:
+            # Ignore bad message errors
+            return
+        except FloodWaitError as e:
+            # We got a flood wait error. Wait for the specified time and recursively retry
+            time.sleep(e.seconds + 1)
+        except TimeoutError:
+            # Timeout error. Just wait for 10 secs.
+            time.sleep(10)
+
+        current_try += 1
 
 
 async def process_message(session, subscriber, message, event, full_scan=False):
     """Process a single message. Check if it has a file we want to download."""
-    to_id, to_type = get_peer_information(message.to_id)
-
+    user_id = None
     try:
         # If this message is forwarded, get the original sender.
         if message.forward and message.forward.sender_id is not None:
@@ -323,17 +334,12 @@ async def process_message(session, subscriber, message, event, full_scan=False):
             new_file.success = True
         session.commit()
 
-    except ValueError:
+    except ValueError as e:
         # Handle broadcast channels those have None for user_id:
         if user_id is None:
             user_id = subscriber.chat_name
         user = UnknownUser(user_id)
-
-    # We got a flood wait error. Wait for the specified time and recursively retry
-    except FloodWaitError as e:
-        time.sleep(e.seconds + 1)
-        process_message(session, subscriber, message, event, full_scan)
-        return
+        raise e
 
 
 def main():
