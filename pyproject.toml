@@ -7,17 +7,13 @@ license = "MIT"
 repository = "https://github.com/nukesor/archivebot"
 
 [tool.poetry.dependencies]
-python = "^3.6, ^3.7"
-cryptg = "^0.1.0.7"
+python = "^3.9"
+cryptg = "^0.2"
 telethon = "^1.8.0"
 SQLAlchemy = "^1.3"
-sqlalchemy-utils = "^0.34"
+sqlalchemy-utils = "^0.37"
 raven = "^6.10"
 toml = "^0.10"
-
-[tool.poetry.dev-dependencies]
-pytest-mock = "^1.10"
-pytest = "^4.0"
 
 [build-system]
 requires = ["poetry>=0.12"]
