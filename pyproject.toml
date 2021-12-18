@@ -7,7 +7,7 @@ license = "MIT"
 repository = "https://github.com/nukesor/archivebot"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = ">=3.10, <4"
 cryptg = "^0.2"
 telethon = "^1.8.0"
 SQLAlchemy = "^1.3"
