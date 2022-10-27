@@ -1,5 +1,6 @@
 """Session handling for commands."""
 import traceback
+
 from archivebot.db import get_session
 from archivebot.sentry import sentry
 
