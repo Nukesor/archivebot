@@ -1,8 +1,8 @@
 """The model for a subscriber."""
-from archivebot.db import base
-
-from sqlalchemy import Column, String, Boolean
+from sqlalchemy import Boolean, Column, String
 from sqlalchemy.orm import relationship
+
+from archivebot.db import base
 
 
 class Subscriber(base):

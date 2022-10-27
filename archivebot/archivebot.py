@@ -1,34 +1,26 @@
 """A bot which downloads various files from chats."""
 import os
+import shutil
 import time
+
 from telethon import TelegramClient, events, types
 from telethon.errors import BadMessageError, FloodWaitError
-import shutil
 
 from archivebot.config import config
-from archivebot.sentry import sentry
-from archivebot.models import (  # noqa
-    File,
-    Subscriber,
-)
-
 from archivebot.helper import (
-    get_peer_information,
+    UnknownUser,
     get_info_text,
     get_option_for_subscriber,
+    get_peer_information,
+    get_username,
     help_text,
     possible_media,
     should_accept_message,
-    get_username,
-    UnknownUser,
 )
+from archivebot.helper.file import create_file, create_zips, get_chat_path, init_zip_dir
 from archivebot.helper.session import session_wrapper
-from archivebot.helper.file import (
-    create_file,
-    create_zips,
-    get_chat_path,
-    init_zip_dir,
-)
+from archivebot.models import File, Subscriber  # noqa
+from archivebot.sentry import sentry
 
 if config["telegram"]["userbot"]:
     NAME = "archivebot"

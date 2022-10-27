@@ -1,16 +1,14 @@
 """Helper module for file helper."""
 import os
 import subprocess
-from telethon import types
 from datetime import datetime
 
-from archivebot.models.file import File
+from telethon import types
+
 from archivebot.config import config
+from archivebot.helper import get_peer_information, get_username
+from archivebot.models.file import File
 from archivebot.sentry import sentry
-from archivebot.helper import (
-    get_username,
-    get_peer_information,
-)
 
 
 async def create_file(session, event, subscriber, message, user, full_scan):
@@ -107,7 +105,10 @@ def get_file_path(subscriber, username, message):
         directory = get_chat_path(subscriber.chat_name)
     # sort_by_user is active. Add the user directory.
     else:
-        directory = os.path.join(get_chat_path(subscriber.chat_name), username.lower(),)
+        directory = os.path.join(
+            get_chat_path(subscriber.chat_name),
+            username.lower(),
+        )
 
     # Create the directory
     if not os.path.exists(directory):
@@ -152,8 +153,8 @@ def find_file_name(directory, file_name):
 async def get_file_information(event, message, subscriber, user, full_scan):
     """Extract and return all information about the given file.
 
-        At the same time we check, whether we actually want this file.
-        In case we don't, return None, None
+    At the same time we check, whether we actually want this file.
+    In case we don't, return None, None
     """
     file_id = None
     file_type = None

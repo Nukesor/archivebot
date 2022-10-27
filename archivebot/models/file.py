@@ -1,13 +1,8 @@
 """The model for a file."""
-from archivebot.db import base
+from sqlalchemy import Boolean, Column, ForeignKeyConstraint, Integer, String
 from sqlalchemy.orm import relationship
-from sqlalchemy import (
-    Column,
-    String,
-    Integer,
-    Boolean,
-    ForeignKeyConstraint,
-)
+
+from archivebot.db import base
 
 
 class File(base):

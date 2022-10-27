@@ -1,6 +1,7 @@
 """Config values for archivebot."""
 import os
 import sys
+
 import toml
 
 default_config = {
@@ -11,13 +12,20 @@ default_config = {
         "app_api_id": 0,
         "app_api_hash": "apihash",
     },
-    "database": {"sql_uri": "sqlite:///archivebot.db",},
-    "logging": {"sentry_enabled": False, "sentry_token": "",},
+    "database": {
+        "sql_uri": "sqlite:///archivebot.db",
+    },
+    "logging": {
+        "sentry_enabled": False,
+        "sentry_token": "",
+    },
     "download": {
         "allowed_types": ["document", "photo"],
         "target_dir": "/home/user/archivebot/",
     },
-    "zip": {"volume_size": "1400m",},
+    "zip": {
+        "volume_size": "1400m",
+    },
 }
 
 config_path = os.path.expanduser("~/.config/archivebot.toml")

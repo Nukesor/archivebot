@@ -3,7 +3,6 @@ from telethon import types
 
 from archivebot.models import Subscriber
 
-
 possible_media = ["document", "photo", "sticker"]
 
 help_text = f"""A handy telegram bot which allows to store files on your server, which are posted in a chat.

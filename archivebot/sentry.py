@@ -1,5 +1,6 @@
 """Simple wrapper around sentry that allows for lazy initilization."""
 from raven import Client
+
 from archivebot.config import config
 
 
