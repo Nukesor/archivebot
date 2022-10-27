@@ -239,7 +239,7 @@ async def zip(event, session):
 
     zip_dir = init_zip_dir(subscriber.chat_name)
 
-    text = f"Zipping started, this might take some time. Please don't issue this command again until I'm finished."
+    text = "Zipping started, this might take some time. Please don't issue this command again until I'm finished."
     await event.respond(text)
 
     create_zips(subscriber.chat_name, zip_dir, chat_path)
