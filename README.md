@@ -4,6 +4,16 @@
 [![Paypal](https://github.com/Nukesor/images/blob/master/paypal-donate-blue.svg)](https://www.paypal.me/arnebeer/)
 [![Patreon](https://github.com/Nukesor/images/blob/master/patreon-donate-blue.svg)](https://www.patreon.com/nukesor)
 
+## :warning: :warning: :warning:  State of the project :warning: :warning: :warning:
+
+The project is **no longer actively** maintained! Might still work for you though.
+
+If you started a successful fork of this repository that has been maintained over a longer period of time, feel free to contact me. I'll then point to your fork :).
+
+:warning: :warning: :warning: :warning: :warning: :warning: :warning: :warning: :warning: :warning: :warning: :warning: :warning:
+
+## Features
+
 A handy bot which enables to download files from telegram chats to your server.
 
 It features a full backup of all files posted in a chat and a continuous backup of incoming new media.
@@ -21,9 +31,9 @@ To send multiple uncompressed pictures and videos with your phone:
 1. Select `File`
 1. Select Gallery (To send images without compression)
 
-**WARNING:**  
+**WARNING:**
 This is a hobby side project of mine. It has been developed for use on Linux, but might work on windows as well.
-There might be some bugs, but I didn't find them yet. I'm happy about any PR's, feel free to help out!  
+There might be some bugs, but I didn't find them yet. I'm happy about any PR's, feel free to help out!
 
 ## Features
 
